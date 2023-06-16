@@ -1,0 +1,7 @@
+﻿  FluxworksEngine.cpp
+C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.cpp(5,6): warning C4273: 'testf': inconsistent dll linkage
+C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.h(10,37): message : see previous definition of 'testf'
+C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.cpp(10,15): warning C4273: 'TestObj::inc': inconsistent dll linkage
+C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.h(15,7): message : see previous definition of 'inc'
+     Creating library C:\Projects\FluxworksEngine-vs\Engine\x64\Debug\Engine.lib and object C:\Projects\FluxworksEngine-vs\Engine\x64\Debug\Engine.exp
+  Engine.vcxproj -> C:\Projects\FluxworksEngine-vs\Engine\x64\Debug\Engine.dll
