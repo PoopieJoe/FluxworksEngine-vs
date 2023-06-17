@@ -3,11 +3,49 @@
 #include <chrono>
 #include <thread>
 #include <functional>
+
 #include "FluxworksEngine.h"
+#include "EventDispatcher.h"
+
+class GenericEvent : public FluxworksEvent 
+{
+public:
+	int i = 0;
+};
+
+class GenericHandler : public FluxworksEventHandler<GenericEvent>
+{
+public:
+	void handler(GenericEvent* event)
+	{
+		std::cout << "Generic event triggered with " << event->i << std::endl;
+	}
+};
+
+class InputEvent : public FluxworksEvent
+{
+public:
+	int i = 0;
+};
+
+class InputHandler : public FluxworksEventHandler<InputEvent>
+{
+public:
+	void handler(InputEvent* event)
+	{
+		std::cout << "Input event triggered with " << event->i << std::endl;
+	}
+};
 
 FluxworksEngine::FluxworksEngine()
 {
-	this->loopInterval_ms = 10; // default loop at 100Hz
+	// Event dispatcher
+	this->_eventDispatcher = FluxworksEventDispatcher();
+	this->_eventDispatcher.addHandler(new GenericHandler);
+	this->_eventDispatcher.addHandler(new InputHandler);
+
+	// Loop parameters
+	this->loopInterval_ms = 1000/TICKRATE; // default loop at 1Hz
 	this->_running = false;
 	this->_t_ms = 0;
 	this->_previousLoopTime = std::chrono::high_resolution_clock::now();
@@ -61,6 +99,12 @@ FluxworksError FluxworksEngine::stop()
 FluxworksError FluxworksEngine::_loop()
 {
 	// Collect events
+	std::cout << "-------------------" << std::endl;
+	this->_eventDispatcher.dispatch(new GenericEvent);
+	this->_eventDispatcher.dispatch(new InputEvent);
+
+
+
 	// Dispatch events to handlers
 	return FluxworksError::Fluxworks_Success;
 }

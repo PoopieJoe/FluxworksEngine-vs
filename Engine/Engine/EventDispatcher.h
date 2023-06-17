@@ -1,7 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-#include <unordered_map>
+#include <unordered_set>
+#include <functional>
+#include <algorithm>
+#include <stdexcept>
 
 /* Idea: Create required Event Types, inheriting from [IEventType],
 * Then the event must be registered with the [EventDispatcher]
@@ -12,26 +15,48 @@
 * 
 */
 
-enum class FluxworksEventType : uint64_t
+
+/// <summary>
+/// Base Event class from which all others events may inherit
+/// </summary>
+class FluxworksEvent 
 {
-	UserInput = 0,
-	UnknownEvent = UINT64_MAX
-};
-
-class IEventType {
-
-};
-
-
-
-
-class EventDispatcher {
 public:
-
-	void addListener(IEventType event, EventHandler handler);
-	void removeListener(IEventType event);
-	void dispatch(IEventType event);
-
-private:
-	std::unordered_map<IEventType, EventHandler> listeners;
+	FluxworksEvent();
+	virtual ~FluxworksEvent() {};
 };
+
+class _FluxworksEventHandlerBase
+{
+public:
+	virtual void handler(FluxworksEvent*) = 0;
+	virtual ~_FluxworksEventHandlerBase();
+};
+
+template <class Event>
+class FluxworksEventHandler : public _FluxworksEventHandlerBase
+{
+public:
+	void handler(FluxworksEvent*);
+	virtual void handler(Event*) = 0;
+};
+
+template<class Event>
+inline void FluxworksEventHandler<Event>::handler(FluxworksEvent* e)
+{
+	Event* derivedEvent = dynamic_cast<Event*>(e);
+	if (derivedEvent)
+	{
+		this->handler(derivedEvent);
+	}
+}	
+
+class FluxworksEventDispatcher
+{
+private:
+    std::unordered_set<_FluxworksEventHandlerBase*> handlers;
+public:
+    void addHandler(_FluxworksEventHandlerBase* eventHandler);
+	void dispatch(FluxworksEvent* event);
+};
+
