@@ -1,3 +1,6 @@
 ﻿  TestGame.cpp
+C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.h(23,40): warning C4251: 'FluxworksEngine::previousLoopTime': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'FluxworksEngine'
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\include\__msvc_chrono.hpp(666,51): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
   TestGame.vcxproj -> C:\Projects\FluxworksEngine-vs\TestGame\x64\Debug\TestGame.exe
-  0 File(s) copied
+  ..\..\Engine\x64\Debug\Engine.dll
+  1 File(s) copied

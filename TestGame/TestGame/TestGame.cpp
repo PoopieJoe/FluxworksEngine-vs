@@ -2,16 +2,16 @@
 //
 
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 #include "FluxworksEngine.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
-    testf();
-    TestObj o;
-    o.i = 1;
-    std::cout << "i is " << o.i << std::endl;
-    o.inc();
-    std::cout << "i is " << o.i << std::endl;
+    FluxworksEngine gameEngine = FluxworksEngine();
+    gameEngine.start();
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    gameEngine.stop();
+    std::cout << "time elapsed is " << gameEngine.t() << " ms" << std::endl;
 }
