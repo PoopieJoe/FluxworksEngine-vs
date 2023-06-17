@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "FluxworksEngine.h"
+#include "ErrorTypes.h"
 #include "EventDispatcher.h"
 
 class GenericEvent : public FluxworksEvent 
@@ -25,7 +26,8 @@ public:
 class InputEvent : public FluxworksEvent
 {
 public:
-	int i = 0;
+	InputEvent(int i) { this->i = i; };
+	int i;
 };
 
 class InputHandler : public FluxworksEventHandler<InputEvent>
@@ -41,8 +43,8 @@ FluxworksEngine::FluxworksEngine()
 {
 	// Event dispatcher
 	this->_eventDispatcher = FluxworksEventDispatcher();
-	this->_eventDispatcher.addHandler(new GenericHandler);
-	this->_eventDispatcher.addHandler(new InputHandler);
+	this->_eventDispatcher.registerHandler(new GenericHandler);
+	this->_eventDispatcher.registerHandler(new InputHandler);
 
 	// Loop parameters
 	this->loopInterval_ms = 1000/TICKRATE; // default loop at 1Hz
@@ -65,7 +67,7 @@ uint64_t FluxworksEngine::t()
 	return this->_t_ms;
 }
 
-FluxworksError FluxworksEngine::start()
+void FluxworksEngine::start()
 {
 	if (!this->_running)
 	{
@@ -81,30 +83,30 @@ FluxworksError FluxworksEngine::start()
 			}
 		});
 		thread_obj.detach();
-		return FluxworksError::Fluxworks_Success;
+		return;
 	}
 	else
 	{
-		return FluxworksError::Fluxworks_Already_Running;
+		throw FluxworksAlreadyRunningException("Fluxworks Engine is already active");
 	}
 	
 }
 
-FluxworksError FluxworksEngine::stop()
+void FluxworksEngine::stop()
 {
 	this->_running = false;
-	return FluxworksError::Fluxworks_Success;
+	return;
 }
 
-FluxworksError FluxworksEngine::_loop()
+void FluxworksEngine::_loop()
 {
 	// Collect events
 	std::cout << "-------------------" << std::endl;
-	this->_eventDispatcher.dispatch(new GenericEvent);
-	this->_eventDispatcher.dispatch(new InputEvent);
+	this->_eventDispatcher.dispatchEvent(new GenericEvent);
+	this->_eventDispatcher.dispatchEvent(new InputEvent(this->t()));
 
 
 
 	// Dispatch events to handlers
-	return FluxworksError::Fluxworks_Success;
+	return;
 }

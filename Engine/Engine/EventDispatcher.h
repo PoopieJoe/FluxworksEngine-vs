@@ -17,7 +17,7 @@
 
 
 /// <summary>
-/// Base Event class from which all others events may inherit
+/// Base Event class from which all (custom) events may inherit
 /// </summary>
 class FluxworksEvent 
 {
@@ -33,14 +33,27 @@ public:
 	virtual ~_FluxworksEventHandlerBase();
 };
 
+/// <summary>
+/// Event handler class for a specific type of [FluxworksEvent].
+/// This handler should implement its own [handler] for its associated [Event].
+/// Every tick all handlers will receive a call for each occurance of its associated events.
+/// </summary>
+/// <typeparam name="Event">The associated Event type</typeparam>
 template <class Event>
 class FluxworksEventHandler : public _FluxworksEventHandlerBase
 {
-public:
+private:
 	void handler(FluxworksEvent*);
+public:
 	virtual void handler(Event*) = 0;
 };
 
+/// <summary>
+/// Attempts to cast the generated event to its associated type, if it fails, nothing happens.
+/// If it succeeds, the handler function is called
+/// </summary>
+/// <typeparam name="Event">The associated event</typeparam>
+/// <param name="e">The generated event</param>
 template<class Event>
 inline void FluxworksEventHandler<Event>::handler(FluxworksEvent* e)
 {
@@ -51,12 +64,16 @@ inline void FluxworksEventHandler<Event>::handler(FluxworksEvent* e)
 	}
 }	
 
+/// <summary>
+/// The dispatcher gathers registered handlers. When an event 
+/// is dispatched, all associated handlers of the event type are called
+/// </summary>
 class FluxworksEventDispatcher
 {
 private:
     std::unordered_set<_FluxworksEventHandlerBase*> handlers;
 public:
-    void addHandler(_FluxworksEventHandlerBase* eventHandler);
-	void dispatch(FluxworksEvent* event);
+    void registerHandler(_FluxworksEventHandlerBase* eventHandler);
+	void dispatchEvent(FluxworksEvent* event);
 };
 

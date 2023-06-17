@@ -1,8 +1,7 @@
 ﻿  TestGame.cpp
 C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.h(26,27): warning C4251: 'FluxworksEngine::_eventDispatcher': class 'FluxworksEventDispatcher' needs to have dll-interface to be used by clients of class 'FluxworksEngine'
-C:\Projects\FluxworksEngine-vs\Engine\Engine\EventDispatcher.h(54,7): message : see declaration of 'FluxworksEventDispatcher'
+C:\Projects\FluxworksEngine-vs\Engine\Engine\EventDispatcher.h(71,7): message : see declaration of 'FluxworksEventDispatcher'
 C:\Projects\FluxworksEngine-vs\Engine\Engine\FluxworksEngine.h(28,40): warning C4251: 'FluxworksEngine::_previousLoopTime': class 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' needs to have dll-interface to be used by clients of class 'FluxworksEngine'
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\__msvc_chrono.hpp(669,51): message : see declaration of 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>'
   TestGame.vcxproj -> C:\Projects\FluxworksEngine-vs\TestGame\x64\Debug\TestGame.exe
-  ..\..\Engine\x64\Debug\Engine.dll
-  1 File(s) copied
+  0 File(s) copied

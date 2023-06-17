@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "EventDispatcher.h"
 
-void FluxworksEventDispatcher::addHandler(_FluxworksEventHandlerBase* eventHandler)
+void FluxworksEventDispatcher::registerHandler(_FluxworksEventHandlerBase* eventHandler)
 {
     this->handlers.insert(eventHandler);
 }
 
-void FluxworksEventDispatcher::dispatch(FluxworksEvent* event)
+void FluxworksEventDispatcher::dispatchEvent(FluxworksEvent* event)
 {
     for (const auto& elem : this->handlers)
     {

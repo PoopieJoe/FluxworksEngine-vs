@@ -9,15 +9,15 @@
 #include <chrono>
 #include "EventDispatcher.h"
 
+
+/// <summary>
+/// Loop frequency in ticks per second. Has millisecond accuracy
+/// </summary>
 constexpr auto TICKRATE = 1;
 
-enum class FluxworksError : uint64_t
-{
-	Fluxworks_Success = 0,
-	Fluxworks_Already_Running,
-	Fluxworks_Unknown_Error = UINT64_MAX
-};
-
+/// <summary>
+/// The Fluxworks Game Engine
+/// </summary>
 class FLUXWORKSENGINE_API FluxworksEngine {
 
 private:
@@ -26,17 +26,38 @@ private:
 	FluxworksEventDispatcher _eventDispatcher;
 
 	std::chrono::steady_clock::time_point _previousLoopTime;
-	FluxworksError _loop();
+	void _loop();
 
 public:
 	FluxworksEngine();
 	~FluxworksEngine();
 
+	/// <summary>
+	/// tickrate of the engine logic
+	/// </summary>
 	uint32_t loopInterval_ms;
 
+	/// <summary>
+	/// Checks whether the engine is running
+	/// </summary>
+	/// <returns>Whether the engine is running</returns>
 	bool isRunning();
+
+	/// <summary>
+	/// Fetches the current in-engine time, in ms
+	/// </summary>
+	/// <returns>Current in-engine time</returns>
 	uint64_t t();
 
-	FluxworksError start();
-	FluxworksError stop();
+	/// <summary>
+	/// Starts the game engine. If the engine is already running, 
+	/// will return a [FluxworksAlreadyRunningException]
+	/// </summary>
+	void start();
+
+	/// <summary>
+	/// Stops the game engine. If the engine is not running,
+	/// no effect.
+	/// </summary>
+	void stop();
 };
