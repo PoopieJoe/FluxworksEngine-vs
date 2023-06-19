@@ -7,6 +7,7 @@
 #endif // FLUXWORKSENGINE_EXPORTS
 
 #include <chrono>
+#include <windows.h>
 #include "EventDispatcher.h"
 #include "GraphicsEngine.h"
 
@@ -37,6 +38,8 @@ private:
 	std::chrono::steady_clock::time_point _previousTickTime;
 	void _loop();
 
+	WindowRenderer window;
+
 public:
 	FluxworksEngine();
 	~FluxworksEngine();
@@ -59,6 +62,8 @@ public:
 	/// will return a [FluxworksAlreadyRunningException]
 	/// </summary>
 	void start();
+
+	void openWindow();
 
 	/// <summary>
 	/// Stops the game engine. If the engine is not running,

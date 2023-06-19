@@ -1,10 +1,12 @@
 #include "pch.h"
+#include <windows.h>
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <functional>
 
 #include "FluxworksEngine.h"
+#include "GraphicsEngine.h"
 #include "ErrorTypes.h"
 #include "EventDispatcher.h"
 
@@ -27,6 +29,9 @@ FluxworksEngine::FluxworksEngine()
 	this->tickFrameDuration = std::chrono::seconds(1/TICKRATE); // default loop at 1Hz
 	this->_running = false;
 	this->_previousTickTime = std::chrono::high_resolution_clock::now();
+
+	this->window = WindowRenderer();
+	this->window.initializeWindow();
 }
 
 FluxworksEngine::~FluxworksEngine()
@@ -62,8 +67,14 @@ void FluxworksEngine::start()
 	{
 		throw FluxworksAlreadyRunningException("Fluxworks Engine is already active");
 	}
-	
 }
+
+void FluxworksEngine::openWindow()
+{
+	this->window.createWindow();
+}
+
+
 
 void FluxworksEngine::stop()
 {

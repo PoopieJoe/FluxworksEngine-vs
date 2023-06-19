@@ -42,8 +42,10 @@ int main()
 
     std::chrono::steady_clock::time_point startTime = std::chrono::high_resolution_clock::now();
     gameEngine.start();
-    std::cout << "Engine started. To quit, press ENTER..." << std::endl;
+    gameEngine.openWindow();
+
     //wait on enter
+    std::cout << "Engine started. To quit, press ENTER..." << std::endl;
     std::cin.ignore();
     gameEngine.stop();
 
