@@ -2,19 +2,10 @@
 
 #include <stdint.h>
 #include <unordered_set>
+#include <list>
 #include <functional>
 #include <algorithm>
 #include <stdexcept>
-
-/* Idea: Create required Event Types, inheriting from [IEventType],
-* Then the event must be registered with the [EventDispatcher]
-* When an Event occurs, all listeners with a handler for that type
-* of event have said handler invoked by the dispatcher
-* https://codereview.stackexchange.com/questions/200049/simple-event-dispatcher
-* https://stackoverflow.com/questions/14033271/design-event-dispatcher-event-source-event-watcher-with-type-safety-in-c
-* 
-*/
-
 
 /// <summary>
 /// Base Event class from which all (custom) events may inherit
@@ -30,7 +21,7 @@ class _FluxworksEventHandlerBase
 {
 public:
 	virtual void handler(FluxworksEvent*) = 0;
-	virtual ~_FluxworksEventHandlerBase();
+	virtual ~_FluxworksEventHandlerBase() {};
 };
 
 /// <summary>
@@ -42,10 +33,9 @@ public:
 template <class Event>
 class FluxworksEventHandler : public _FluxworksEventHandlerBase
 {
-private:
-	void handler(FluxworksEvent*);
 public:
 	virtual void handler(Event*) = 0;
+	void handler(FluxworksEvent*);
 };
 
 /// <summary>
@@ -72,8 +62,24 @@ class FluxworksEventDispatcher
 {
 private:
     std::unordered_set<_FluxworksEventHandlerBase*> handlers;
+	std::list< FluxworksEvent*> eventQueue;
 public:
+
+    /// <summary>
+    /// Registers a handler with the dispatcher.
+    /// </summary>
+    /// <param name="eventHandler">Handler object to add</param>
     void registerHandler(_FluxworksEventHandlerBase* eventHandler);
+
+	/// <summary>
+	/// Dispatches an event to all handlers, registered using
+	/// [registerHandler], of the event type.
+	/// </summary>
+	/// <param name="event">Event to dispatch</param>
 	void dispatchEvent(FluxworksEvent* event);
+
+	void queueEvent(FluxworksEvent* event);
+	void dispatchQueue(void);
+	void dispatchQueue(int n);
 };
 

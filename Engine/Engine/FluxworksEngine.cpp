@@ -8,34 +8,12 @@
 #include "ErrorTypes.h"
 #include "EventDispatcher.h"
 
-class GenericEvent : public FluxworksEvent 
+class _BuiltinTickHandler : public FluxworksEventHandler<TickEvent>
 {
 public:
-	int i = 0;
-};
-
-class GenericHandler : public FluxworksEventHandler<GenericEvent>
-{
-public:
-	void handler(GenericEvent* event)
+	void handler(TickEvent* event)
 	{
-		std::cout << "Generic event triggered with " << event->i << std::endl;
-	}
-};
-
-class InputEvent : public FluxworksEvent
-{
-public:
-	InputEvent(int i) { this->i = i; };
-	int i;
-};
-
-class InputHandler : public FluxworksEventHandler<InputEvent>
-{
-public:
-	void handler(InputEvent* event)
-	{
-		std::cout << "Input event triggered with " << event->i << std::endl;
+		std::cout << "Builtin tick handler for engine things" << std::endl;
 	}
 };
 
@@ -43,28 +21,26 @@ FluxworksEngine::FluxworksEngine()
 {
 	// Event dispatcher
 	this->_eventDispatcher = FluxworksEventDispatcher();
-	this->_eventDispatcher.registerHandler(new GenericHandler);
-	this->_eventDispatcher.registerHandler(new InputHandler);
+	this->_eventDispatcher.registerHandler(new _BuiltinTickHandler);
 
 	// Loop parameters
-	this->loopInterval_ms = 1000/TICKRATE; // default loop at 1Hz
+	this->tickFrameDuration = std::chrono::seconds(1/TICKRATE); // default loop at 1Hz
 	this->_running = false;
-	this->_t_ms = 0;
-	this->_previousLoopTime = std::chrono::high_resolution_clock::now();
+	this->_previousTickTime = std::chrono::high_resolution_clock::now();
 }
 
 FluxworksEngine::~FluxworksEngine()
 {
 }
 
+void FluxworksEngine::registerEventHandler(_FluxworksEventHandlerBase* eventHandler)
+{
+	this->_eventDispatcher.registerHandler(eventHandler);
+}
+
 bool FluxworksEngine::isRunning()
 {
 	return this->_running;
-}
-
-uint64_t FluxworksEngine::t()
-{
-	return this->_t_ms;
 }
 
 void FluxworksEngine::start()
@@ -76,10 +52,7 @@ void FluxworksEngine::start()
 		{
 			while (this->_running)
 			{
-				this->_t_ms += this->loopInterval_ms;
 				this->_loop();
-				std::this_thread::sleep_until(this->_previousLoopTime + std::chrono::milliseconds(this->loopInterval_ms));
-				this->_previousLoopTime = std::chrono::high_resolution_clock::now();
 			}
 		});
 		thread_obj.detach();
@@ -100,13 +73,38 @@ void FluxworksEngine::stop()
 
 void FluxworksEngine::_loop()
 {
-	// Collect events
-	std::cout << "-------------------" << std::endl;
-	this->_eventDispatcher.dispatchEvent(new GenericEvent);
-	this->_eventDispatcher.dispatchEvent(new InputEvent(this->t()));
+	// fetch time for this tick
+	std::chrono::steady_clock::time_point t = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> dt = t - this->_previousTickTime;
+	this->_previousTickTime = t;
+
+	// Handle events generated in previous tick
+	this->_eventDispatcher.dispatchQueue();
 
 
+	// Tick
+	this->_eventDispatcher.dispatchEvent(new TickEvent(
+		dt,
+		t
+	));
 
-	// Dispatch events to handlers
+	// Put thread to sleep until next tick starts
+	// If tickframe overrun -> skip
+	if (std::chrono::high_resolution_clock::now() - t > this->tickFrameDuration)
+	{
+		std::cout << "TICKFRAME OVERRUN. SKIPPING TICKS" << std::endl;
+		std::this_thread::sleep_until(t + 2*this->tickFrameDuration);
+	}
+	else
+	{
+		std::this_thread::sleep_until(t + this->tickFrameDuration);
+	}
+	
 	return;
+}
+
+TickEvent::TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time)
+{
+	this->deltaTime = deltaTime;
+	this->time = time;
 }

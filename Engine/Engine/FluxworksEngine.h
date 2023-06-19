@@ -8,12 +8,22 @@
 
 #include <chrono>
 #include "EventDispatcher.h"
+#include "GraphicsEngine.h"
 
 
 /// <summary>
 /// Loop frequency in ticks per second. Has millisecond accuracy
 /// </summary>
 constexpr auto TICKRATE = 1;
+
+class TickEvent : public FluxworksEvent
+{
+public:
+	TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time);
+
+	std::chrono::duration<double> deltaTime;
+	std::chrono::steady_clock::time_point time;
+};
 
 /// <summary>
 /// The Fluxworks Game Engine
@@ -22,10 +32,9 @@ class FLUXWORKSENGINE_API FluxworksEngine {
 
 private:
 	bool _running;
-	uint64_t _t_ms;
 	FluxworksEventDispatcher _eventDispatcher;
 
-	std::chrono::steady_clock::time_point _previousLoopTime;
+	std::chrono::steady_clock::time_point _previousTickTime;
 	void _loop();
 
 public:
@@ -35,19 +44,15 @@ public:
 	/// <summary>
 	/// tickrate of the engine logic
 	/// </summary>
-	uint32_t loopInterval_ms;
+	std::chrono::duration<double> tickFrameDuration;
+
+	void registerEventHandler(_FluxworksEventHandlerBase* eventHandler);
 
 	/// <summary>
 	/// Checks whether the engine is running
 	/// </summary>
 	/// <returns>Whether the engine is running</returns>
 	bool isRunning();
-
-	/// <summary>
-	/// Fetches the current in-engine time, in ms
-	/// </summary>
-	/// <returns>Current in-engine time</returns>
-	uint64_t t();
 
 	/// <summary>
 	/// Starts the game engine. If the engine is already running, 
