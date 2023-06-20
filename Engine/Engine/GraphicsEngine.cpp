@@ -42,20 +42,20 @@ void WindowRenderer::initializeWindow(void)
 	this->wndclass.hIconSm = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SMALL));
 }
 
-void WindowRenderer::createWindow(void)
+void WindowRenderer::createWindow(const wchar_t* title)
 {
 	if (!this->_running)
 	{
 		this->_running = true;
 		this->hAccelTable = LoadAccelerators(GetModuleHandle(NULL), MAKEINTRESOURCE(IDC_VSENGINEPROJECT));
 
-		std::thread windowThread([this]()
+		std::thread windowThread([this,title]()
 		{
 			if (RegisterClassEx(&(this->wndclass)))
 			{
 				this->hwnd = CreateWindowW(
 					this->wndclass.lpszClassName,
-					L"AAA",
+					title,
 					WS_OVERLAPPEDWINDOW,
 					CW_USEDEFAULT,
 					0, CW_USEDEFAULT,
@@ -67,6 +67,7 @@ void WindowRenderer::createWindow(void)
 				);
 				ShowWindow(this->hwnd, SW_SHOWNORMAL);
 				UpdateWindow(this->hwnd);
+				std::cout << "Window opened" << std::endl;
 			}
 
 			MSG msg;
@@ -109,42 +110,43 @@ LRESULT WindowRenderer::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 {
 	switch (message)
 	{
-	case WM_COMMAND:
-	{
-		int wmId = LOWORD(wParam);
-		// Parse the menu selections:
-		switch (wmId)
+		case WM_COMMAND:
 		{
-		case IDM_ABOUT:
-			//DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
+			int wmId = LOWORD(wParam);
+			// Parse the menu selections:
+			switch (wmId)
+			{
+				case IDM_ABOUT:
+					DialogBoxParamW(GetModuleHandleW(0), ((LPWSTR)((ULONG_PTR)((WORD)(103)))), hWnd, WindowRenderer::About, 0L);
+					break;
+				case IDM_EXIT:
+					DestroyWindow(hWnd);
+					break;
+				default:
+					return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+		}
+		break;
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hWnd, &ps);
+			// TODO: Add any drawing code that uses hdc here...
+			EndPaint(hWnd, &ps);
+		}
+		break;
+		case WM_DESTROY:
+			std::cout << "Window destroyed" << std::endl;
+			PostQuitMessage(0);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
-	}
-	break;
-	case WM_PAINT:
-	{
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code that uses hdc here...
-		EndPaint(hWnd, &ps);
-	}
-	break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
 	return 0;
 }
 
 // Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK WindowRenderer::About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)

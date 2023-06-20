@@ -8,6 +8,7 @@
 
 #include "FluxworksEngine.h"
 
+#define WINDOWNAME L"TestGame"
 
 class CustomTickHandler : public FluxworksEventHandler<TickEvent>
 {
@@ -41,13 +42,13 @@ int main()
     gameEngine.registerEventHandler(new CustomEventHandler);
 
     std::chrono::steady_clock::time_point startTime = std::chrono::high_resolution_clock::now();
-    gameEngine.start();
-    gameEngine.openWindow();
+    //gameEngine.start();
+    gameEngine.createWindow(WINDOWNAME);
 
     //wait on enter
     std::cout << "Engine started. To quit, press ENTER..." << std::endl;
     std::cin.ignore();
-    gameEngine.stop();
+    //gameEngine.stop();
 
     std::chrono::steady_clock::time_point stopTime = std::chrono::high_resolution_clock::now();
     std::cout << "time elapsed is " << std::chrono::duration<double>(stopTime-startTime).count() << " s" << std::endl;
