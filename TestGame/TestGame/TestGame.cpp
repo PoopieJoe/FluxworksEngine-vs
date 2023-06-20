@@ -21,7 +21,7 @@ public:
 class CustomEvent : public FluxworksEvent
 {
 public:
-    CustomEvent(std::string msg) { this->msg = msg; };
+    CustomEvent(std::string msg) { this->msg = msg; }; 
     std::string msg;
 };
 

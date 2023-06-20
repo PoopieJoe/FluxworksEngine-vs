@@ -4,8 +4,14 @@
 #include <thread>
 #include <iostream>
 
-#include <Windows.h>
-#include <windowsx.h>
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+// Windows Header Files
+#include <windows.h>
+// C RunTime Header Files
+#include <stdlib.h>
+#include <malloc.h>
+#include <memory.h>
+#include <tchar.h>
 
 #include "ErrorTypes.h"
 
@@ -19,52 +25,21 @@ WindowRenderer::~WindowRenderer()
 {
 }
 
-LRESULT WindowRenderer::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	std::cout << "WindowProc" << std::endl;
-	switch (message)
-	{
-		case WM_DESTROY:
-		{
-			std::cout << "Quitting Window" << std::endl;
-			PostQuitMessage(0);
-			return 0;
-		}
-	}
-	return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
 void WindowRenderer::initializeWindow(void)
 {
+	this->wndclass.cbSize = sizeof(WNDCLASSEX);
+
 	this->wndclass.style = CS_HREDRAW | CS_VREDRAW;
+	this->wndclass.lpfnWndProc = WindowRenderer::WindowProc;
 	this->wndclass.cbClsExtra = 0;
 	this->wndclass.cbWndExtra = 0;
-	this->wndclass.lpszClassName = L"Window";
-	this->wndclass.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-	this->wndclass.lpszMenuName = NULL;
-	this->wndclass.lpfnWndProc = WindowRenderer::WindowProc;
-	this->wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	this->wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	this->wndclass.hInstance = GetModuleHandle(NULL);
-
-
-	if (RegisterClass(&(this->wndclass)))
-	{
-		this->hwnd = CreateWindowEx(
-			WS_EX_LEFT,
-			this->wndclass.lpszClassName, 
-			L"AAA",
-			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-			100, 
-			100, 
-			350, 
-			250,
-			NULL, 
-			NULL, 
-			GetModuleHandle(NULL), 
-			NULL
-		);
-	}
+	this->wndclass.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_VSENGINEPROJECT));
+	this->wndclass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	this->wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	this->wndclass.lpszMenuName = MAKEINTRESOURCEW(IDC_VSENGINEPROJECT);
+	this->wndclass.lpszClassName = L"AAA";
+	this->wndclass.hIconSm = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SMALL));
 }
 
 void WindowRenderer::createWindow(void)
@@ -72,30 +47,50 @@ void WindowRenderer::createWindow(void)
 	if (!this->_running)
 	{
 		this->_running = true;
-		std::cout << "Create window" << std::endl;
+		this->hAccelTable = LoadAccelerators(GetModuleHandle(NULL), MAKEINTRESOURCE(IDC_VSENGINEPROJECT));
+
 		std::thread windowThread([this]()
 		{
-			ShowWindow(this->hwnd, SW_SHOWNORMAL);
+			if (RegisterClassEx(&(this->wndclass)))
+			{
+				this->hwnd = CreateWindowW(
+					this->wndclass.lpszClassName,
+					L"AAA",
+					WS_OVERLAPPEDWINDOW,
+					CW_USEDEFAULT,
+					0, CW_USEDEFAULT,
+					0,
+					nullptr,
+					nullptr,
+					GetModuleHandle(NULL),
+					nullptr
+				);
+				ShowWindow(this->hwnd, SW_SHOWNORMAL);
+				UpdateWindow(this->hwnd);
+			}
+
 			MSG msg;
 			BOOL bRet;
 			while (this->_running && this->hwnd)
 			{
 				bRet = GetMessage(&msg, this->hwnd, 0, 0);
-
-				if (bRet > 0)  // (bRet > 0 indicates a message that must be processed.)
+				if (bRet > 0)  // (bret > 0 indicates a message that must be processed.)
 				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
+					if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+					{
+						TranslateMessage(&msg);
+						DispatchMessage(&msg);
+					}
 				}
-				else if (bRet < 0)  // (bRet == -1 indicates an error.)
+				else if (bRet < 0)  // (bret == -1 indicates an error.)
 				{
-					// Handle or log the error; possibly exit.
+					// handle or log the error; possibly exit.
 					// ...
 					break;
 				}
-				else  // (bRet == 0 indicates "exit program".)
+				else  // (bret == 0 indicates "exit program".)
 				{
-					std::cout << "Window loessoe" << std::endl;
+					std::cout << "window loessoe" << std::endl;
 					break;
 				}
 			}
@@ -107,4 +102,63 @@ void WindowRenderer::createWindow(void)
 	{
 		throw FluxworksWindowAlreadyOpenException("Fluxworks Engine window is already open");
 	}
+}
+
+
+LRESULT WindowRenderer::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_COMMAND:
+	{
+		int wmId = LOWORD(wParam);
+		// Parse the menu selections:
+		switch (wmId)
+		{
+		case IDM_ABOUT:
+			//DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			break;
+		case IDM_EXIT:
+			DestroyWindow(hWnd);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+	}
+	break;
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
+		// TODO: Add any drawing code that uses hdc here...
+		EndPaint(hWnd, &ps);
+	}
+	break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
+}
+
+// Message handler for about box.
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
 }
