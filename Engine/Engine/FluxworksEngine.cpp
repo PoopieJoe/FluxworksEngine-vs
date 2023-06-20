@@ -15,7 +15,7 @@ class _BuiltinTickHandler : public FluxworksEventHandler<TickEvent>
 public:
 	void handler(TickEvent* event)
 	{
-		std::cout << "Builtin tick handler for engine things" << std::endl;
+		//std::cout << "Builtin tick handler for engine things" << std::endl;
 	}
 };
 
@@ -69,9 +69,9 @@ void FluxworksEngine::start()
 	}
 }
 
-void FluxworksEngine::openWindow()
+void FluxworksEngine::createWindow(const wchar_t* title)
 {
-	this->window.createWindow();
+	this->window.createWindow(title);
 }
 
 

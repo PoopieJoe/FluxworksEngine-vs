@@ -32,7 +32,7 @@ class WindowRenderer {
 	WNDCLASSEX wndclass;
 	HWND hwnd;
 	HACCEL hAccelTable;
-	INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
 	WindowRenderer();
@@ -40,5 +40,5 @@ public:
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void initializeWindow( void );
-	void createWindow(void);
+	void createWindow(const wchar_t* title);
 };
