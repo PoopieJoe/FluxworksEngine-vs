@@ -39,6 +39,11 @@ void FluxworksEngine::registerEventHandler(_FluxworksEventHandlerBase* eventHand
 	this->_eventDispatcher->registerHandler(eventHandler);
 }
 
+void FluxworksEngine::registerEventHandlers(std::list<_FluxworksEventHandlerBase*> eventHandlers)
+{
+	for (_FluxworksEventHandlerBase* const& i : eventHandlers) this->registerEventHandler(i);
+}
+
 void FluxworksEngine::windowEventCallback(FluxworksEvent* event)
 {
 	std::cout << "windowCallback" << std::endl;
@@ -72,9 +77,9 @@ void FluxworksEngine::start()
 
 void FluxworksEngine::createWindow(const wchar_t* title)
 {
-	std::thread windowThread([this]()
+	std::thread windowThread([this,title]()
 	{
-		SampleWindow window = SampleWindow(this->_eventDispatcher);
+		MainWindow window = MainWindow(this->_eventDispatcher,title);
 		MSG message;
 
 		while (GetMessage(&message,

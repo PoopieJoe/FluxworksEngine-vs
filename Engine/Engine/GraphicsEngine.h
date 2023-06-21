@@ -34,18 +34,66 @@
 #define IDC_STATIC				-1
 #endif
 
-class LeftMouseButtonDownEvent : public FluxworksEvent
+class WindowEvents 
 {
 public:
+    class Mouse : public FluxworksEvent
+    {
+    public:
+        class Position : public FluxworksEvent
+        {
+        public:
+            Position(HWND windowHandle, long x, long y) : FluxworksEvent("WindowEvents::Mouse::Position")
+            {
+                this->windowHandle = windowHandle;
+                this->x = x;
+                this->y = y;
+            }
+            HWND windowHandle;
+            long x;
+            long y;
+        };
 
-	LeftMouseButtonDownEvent(long x, long y) : FluxworksEvent("LeftMouseButtonDownEvent")
-	{
-		this->x = x;
-		this->y = y;
-	}
+        class LMBDown : public FluxworksEvent
+        {
+        public:
 
-	long x;
-	long y;
+            LMBDown(HWND windowHandle, long x, long y) : FluxworksEvent("WindowEvents::Mouse::LMBDown")
+            {
+                this->windowHandle = windowHandle;
+                this->x = x;
+                this->y = y;
+            }
+            HWND windowHandle;
+            long x;
+            long y;
+        };
+      
+    };
+
+    
+
+    class Open : public FluxworksEvent
+    {
+    public:
+
+        Open(HWND windowHandle) : FluxworksEvent("WindowEvents::Open")
+        {
+            this->windowHandle = windowHandle;
+        }
+        HWND windowHandle;
+    };
+
+    class Close : public FluxworksEvent
+    {
+    public:
+
+        Close(HWND windowHandle) : FluxworksEvent("WindowEvents::Close")
+        {
+            this->windowHandle = windowHandle;
+        }
+        HWND windowHandle;
+    };
 };
 
 template <typename T>
@@ -60,7 +108,7 @@ struct Window
                 window,
                 GWLP_USERDATA
             )
-        );
+            );
     }
 
     static LRESULT CALLBACK WndProc
@@ -125,18 +173,20 @@ struct Window
     }
 };
 
-struct SampleWindow : Window<SampleWindow>
+struct MainWindow : Window<MainWindow>
 {
     std::shared_ptr<FluxworksEventDispatcher> evd;
+    const wchar_t* title;
 
-    SampleWindow(std::shared_ptr<FluxworksEventDispatcher> evd)
+    MainWindow(std::shared_ptr<FluxworksEventDispatcher> evd, const wchar_t* title)
     {
         this->evd = evd;
+        this->title = title;
         WNDCLASS wc = {};
 
         wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
         wc.hInstance = reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL));
-        wc.lpszClassName = L"SampleWindow";
+        wc.lpszClassName = L"FluxworksEngineWindow";
         wc.style = CS_HREDRAW | CS_VREDRAW;
         wc.lpfnWndProc = WndProc;
 
@@ -146,7 +196,7 @@ struct SampleWindow : Window<SampleWindow>
 
         CreateWindow(
             wc.lpszClassName,
-            L"Window Title",
+            title,
             WS_OVERLAPPEDWINDOW | WS_VISIBLE,
             CW_USEDEFAULT, CW_USEDEFAULT,
             CW_USEDEFAULT, CW_USEDEFAULT,
@@ -176,7 +226,18 @@ struct SampleWindow : Window<SampleWindow>
                 POINT p;
                 p.x = GET_X_LPARAM(lparam);
                 p.y = GET_Y_LPARAM(lparam);
-                this->evd->dispatchEvent(new LeftMouseButtonDownEvent(p.x,p.y));
+                this->evd->dispatchEvent(new WindowEvents::Mouse::LMBDown(this->m_window,p.x, p.y));
+                return 0;
+            }
+            case WM_CREATE:
+            {
+                this->evd->dispatchEvent(new WindowEvents::Open(this->m_window));
+                return 0;
+            }
+            case WM_DESTROY:
+            {
+                PostQuitMessage(0);
+                this->evd->dispatchEvent(new WindowEvents::Close(this->m_window));
                 return 0;
             }
         }

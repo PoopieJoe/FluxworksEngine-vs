@@ -52,6 +52,8 @@ public:
 
 	void registerEventHandler(_FluxworksEventHandlerBase* eventHandler);
 
+	void registerEventHandlers(std::list<_FluxworksEventHandlerBase*> eventHandlers);
+
 	static void windowEventCallback(FluxworksEvent* event);
 
 	/// <summary>

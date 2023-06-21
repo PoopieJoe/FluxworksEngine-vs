@@ -10,7 +10,9 @@
 
 #define WINDOWNAME L"TestGame"
 
-class CustomTickHandler : public FluxworksEventHandler<TickEvent>
+FluxworksEngine gameEngine;
+
+class TickHandler : public FluxworksEventHandler<TickEvent>
 {
 public:
     void handler(TickEvent* event)
@@ -19,29 +21,38 @@ public:
     }
 };
 
-class LMBDownHandler : public FluxworksEventHandler<LeftMouseButtonDownEvent>
+class LMBDownHandler : public FluxworksEventHandler<WindowEvents::Mouse::LMBDown>
 {
 public:
-    void handler(LeftMouseButtonDownEvent* event)
+    void handler(WindowEvents::Mouse::LMBDown* event)
     {
         std::cout << "LMBDown (" << event->x << "," << event->y  << ")" << std::endl;
     }
 };
 
+class WindowCloseHandler : public FluxworksEventHandler<WindowEvents::Close>
+{
+public:
+    void handler(WindowEvents::Close* event)
+    {
+        gameEngine.stop();
+    }
+};
+
 int main()
 {
-    FluxworksEngine gameEngine = FluxworksEngine();
-    gameEngine.registerEventHandler(new CustomTickHandler);
-    gameEngine.registerEventHandler(new LMBDownHandler);
+    gameEngine.registerEventHandlers({ 
+        new TickHandler, 
+        new LMBDownHandler, 
+        new WindowCloseHandler 
+    });
 
     std::chrono::steady_clock::time_point startTime = std::chrono::high_resolution_clock::now();
     gameEngine.start();
     gameEngine.createWindow(WINDOWNAME);
 
-    //wait on enter
-    std::cout << "Engine started. To quit, press ENTER..." << std::endl;
-    std::cin.ignore();
-    gameEngine.stop();
+    //wait until window is closed
+    while (gameEngine.isRunning());
 
     std::chrono::steady_clock::time_point stopTime = std::chrono::high_resolution_clock::now();
     std::cout << "time elapsed is " << std::chrono::duration<double>(stopTime-startTime).count() << " s" << std::endl;
