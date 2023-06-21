@@ -19,19 +19,12 @@ public:
     }
 };
 
-class CustomEvent : public FluxworksEvent
+class LMBDownHandler : public FluxworksEventHandler<LeftMouseButtonDownEvent>
 {
 public:
-    CustomEvent(std::string msg) { this->msg = msg; }; 
-    std::string msg;
-};
-
-class CustomEventHandler : public FluxworksEventHandler<CustomEvent>
-{
-public:
-    void handler(CustomEvent* event)
+    void handler(LeftMouseButtonDownEvent* event)
     {
-        std::cout << "Custom event generated with message " << event->msg << std::endl;
+        std::cout << "LMBDown (" << event->x << "," << event->x  << ")" << std::endl;
     }
 };
 
@@ -39,7 +32,7 @@ int main()
 {
     FluxworksEngine gameEngine = FluxworksEngine();
     gameEngine.registerEventHandler(new CustomTickHandler);
-    gameEngine.registerEventHandler(new CustomEventHandler);
+    gameEngine.registerEventHandler(new LMBDownHandler);
 
     std::chrono::steady_clock::time_point startTime = std::chrono::high_resolution_clock::now();
     gameEngine.start();
