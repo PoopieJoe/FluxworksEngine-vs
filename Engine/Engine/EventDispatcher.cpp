@@ -8,6 +8,7 @@ void FluxworksEventDispatcher::registerHandler(_FluxworksEventHandlerBase* event
 
 void FluxworksEventDispatcher::dispatchEvent(FluxworksEvent* event)
 {
+    std::cout << "<" << event->typeName << ">" << std::endl;
     for (const auto& elem : this->handlers)
     {
         elem->handler(event);
@@ -33,6 +34,7 @@ void FluxworksEventDispatcher::dispatchQueue(int n)
     }
 }
 
-FluxworksEvent::FluxworksEvent()
+FluxworksEvent::FluxworksEvent(const char* typeName)
 {
+    this->typeName = typeName;
 }

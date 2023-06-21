@@ -130,7 +130,7 @@ void FluxworksEngine::_loop()
 
 
 
-TickEvent::TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time)
+TickEvent::TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time) : FluxworksEvent("TickEvent")
 {
 	this->deltaTime = deltaTime;
 	this->time = time;

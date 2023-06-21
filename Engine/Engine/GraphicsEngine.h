@@ -37,7 +37,8 @@
 class LeftMouseButtonDownEvent : public FluxworksEvent
 {
 public:
-	LeftMouseButtonDownEvent(long x, long y)
+
+	LeftMouseButtonDownEvent(long x, long y) : FluxworksEvent("LeftMouseButtonDownEvent")
 	{
 		this->x = x;
 		this->y = y;

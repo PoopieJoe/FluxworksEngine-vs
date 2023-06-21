@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <unordered_set>
 #include <list>
+#include <iostream>
 #include <functional>
 #include <algorithm>
 #include <stdexcept>
@@ -13,8 +14,10 @@
 class FluxworksEvent 
 {
 public:
-	FluxworksEvent();
+	FluxworksEvent(const char* typeName);
 	virtual ~FluxworksEvent() {};
+
+	const char* typeName;
 };
 
 class _FluxworksEventHandlerBase
