@@ -22,15 +22,12 @@ public:
 FluxworksEngine::FluxworksEngine()
 {
 	// Event dispatcher
-	this->_eventDispatcher = FluxworksEventDispatcher();
-	this->_eventDispatcher.registerHandler(new _BuiltinTickHandler);
+	this->_eventDispatcher->registerHandler(new _BuiltinTickHandler);
 
 	// Loop parameters
 	this->tickFrameDuration = std::chrono::seconds(1/TICKRATE); // default loop at 1Hz
 	this->_running = false;
 	this->_previousTickTime = std::chrono::high_resolution_clock::now();
-
-	this->window = WindowRenderer();
 }
 
 FluxworksEngine::~FluxworksEngine()
@@ -39,7 +36,7 @@ FluxworksEngine::~FluxworksEngine()
 
 void FluxworksEngine::registerEventHandler(_FluxworksEventHandlerBase* eventHandler)
 {
-	this->_eventDispatcher.registerHandler(eventHandler);
+	this->_eventDispatcher->registerHandler(eventHandler);
 }
 
 void FluxworksEngine::windowEventCallback(FluxworksEvent* event)
@@ -75,7 +72,20 @@ void FluxworksEngine::start()
 
 void FluxworksEngine::createWindow(const wchar_t* title)
 {
-	this->window.createWindow(title, &(FluxworksEngine::windowEventCallback));
+	std::thread windowThread([this]()
+	{
+		SampleWindow window = SampleWindow(this->_eventDispatcher);
+		MSG message;
+
+		while (GetMessage(&message,
+			nullptr,
+			0,
+			0))
+		{
+			DispatchMessage(&message);
+		}
+	});
+	windowThread.detach();
 }
 
 
@@ -94,11 +104,11 @@ void FluxworksEngine::_loop()
 	this->_previousTickTime = t;
 
 	// Handle events generated in previous tick
-	this->_eventDispatcher.dispatchQueue();
+	this->_eventDispatcher->dispatchQueue();
 
 
 	// Tick
-	this->_eventDispatcher.dispatchEvent(new TickEvent(
+	this->_eventDispatcher->dispatchEvent(new TickEvent(
 		dt,
 		t
 	));

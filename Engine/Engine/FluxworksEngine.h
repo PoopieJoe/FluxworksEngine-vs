@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <windows.h>
+#include <memory>
 #include "EventDispatcher.h"
 #include "GraphicsEngine.h"
 
@@ -33,12 +34,12 @@ class FLUXWORKSENGINE_API FluxworksEngine {
 
 private:
 	bool _running;
-	FluxworksEventDispatcher _eventDispatcher;
 
 	std::chrono::steady_clock::time_point _previousTickTime;
 	void _loop();
 
-	WindowRenderer window;
+	std::shared_ptr<FluxworksEventDispatcher> _eventDispatcher = std::make_shared<FluxworksEventDispatcher>();
+	//std::shared_ptr<WindowRenderer> window = std::make_shared<WindowRenderer>();
 
 public:
 	FluxworksEngine();
