@@ -51,6 +51,8 @@ public:
 
 	void registerEventHandler(_FluxworksEventHandlerBase* eventHandler);
 
+	static void windowEventCallback(FluxworksEvent* event);
+
 	/// <summary>
 	/// Checks whether the engine is running
 	/// </summary>

@@ -7,6 +7,7 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files
 #include <windows.h>
+#include <windowsx.h>
 // C RunTime Header Files
 #include <stdlib.h>
 #include <malloc.h>
@@ -14,19 +15,25 @@
 #include <tchar.h>
 
 #include "ErrorTypes.h"
+#include "EventDispatcher.h"
 
 WindowRenderer::WindowRenderer()
 {
 	this->_running = false;
 	this->hwnd = NULL;
+	this->hAccelTable = HACCEL();
+	this->windowTitle = L"";
+	this->wndclass = WNDCLASSEX();
 }
 
 WindowRenderer::~WindowRenderer()
 {
 }
 
-void WindowRenderer::initializeWindow(void)
+void WindowRenderer::initializeWindow(const wchar_t* title)
 {
+	this->windowTitle = title;
+
 	this->wndclass.cbSize = sizeof(WNDCLASSEX);
 
 	this->wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -38,27 +45,31 @@ void WindowRenderer::initializeWindow(void)
 	this->wndclass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	this->wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	this->wndclass.lpszMenuName = MAKEINTRESOURCEW(IDC_VSENGINEPROJECT);
-	this->wndclass.lpszClassName = L"AAA";
+	this->wndclass.lpszClassName = this->windowTitle;
 	this->wndclass.hIconSm = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SMALL));
 }
 
-void WindowRenderer::createWindow(const wchar_t* title)
+void WindowRenderer::createWindow(const wchar_t* title, windowEventCallback_t callback)
 {
 	if (!this->_running)
 	{
 		this->_running = true;
+		this->windowTitle = title;
+		//WindowRenderer::windowEventCallback = callback;
+		this->initializeWindow(this->windowTitle);
 		this->hAccelTable = LoadAccelerators(GetModuleHandle(NULL), MAKEINTRESOURCE(IDC_VSENGINEPROJECT));
 
-		std::thread windowThread([this,title]()
+		std::thread windowThread([this]()
 		{
 			if (RegisterClassEx(&(this->wndclass)))
 			{
 				this->hwnd = CreateWindowW(
 					this->wndclass.lpszClassName,
-					title,
+					this->windowTitle,
 					WS_OVERLAPPEDWINDOW,
 					CW_USEDEFAULT,
-					0, CW_USEDEFAULT,
+					0, 
+					CW_USEDEFAULT,
 					0,
 					nullptr,
 					nullptr,
@@ -117,7 +128,7 @@ LRESULT WindowRenderer::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 			switch (wmId)
 			{
 				case IDM_ABOUT:
-					DialogBoxParamW(GetModuleHandleW(0), ((LPWSTR)((ULONG_PTR)((WORD)(103)))), hWnd, WindowRenderer::About, 0L);
+					DialogBoxParam(GetModuleHandleW(0), ((LPWSTR)((ULONG_PTR)((WORD)(103)))), hWnd, WindowRenderer::About, 0L);
 					break;
 				case IDM_EXIT:
 					DestroyWindow(hWnd);
@@ -139,7 +150,16 @@ LRESULT WindowRenderer::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 			std::cout << "Window destroyed" << std::endl;
 			PostQuitMessage(0);
 			break;
+
+		case WM_LBUTTONDOWN:
+			POINT p;
+			p.x = GET_X_LPARAM(lParam);
+			p.y = GET_Y_LPARAM(lParam);
+			std::cout << "WM_LBUTTONDOWN (" << p.x << "," << p.y << ")" << std::endl;
+			//WindowRenderer::windowEventCallback(new LeftMouseButtonDownEvent(p.x,p.y));
+
 		default:
+			//std::cout << "Window message: " << std::hex << message << std::endl;
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 	return 0;

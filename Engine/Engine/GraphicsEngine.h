@@ -11,6 +11,10 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <thread>
+
+#include "EventDispatcher.h"
+
 
 #define IDS_APP_TITLE			103
 
@@ -27,18 +31,36 @@
 #define IDC_STATIC				-1
 #endif
 
+class LeftMouseButtonDownEvent : public FluxworksEvent
+{
+public:
+	LeftMouseButtonDownEvent(long x, long y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+
+	long x;
+	long y;
+};
+
+typedef void (*windowEventCallback_t)(FluxworksEvent* event);
+
 class WindowRenderer {
 	bool _running;
 	WNDCLASSEX wndclass;
 	HWND hwnd;
 	HACCEL hAccelTable;
 	static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	const wchar_t* windowTitle;
+	//static windowEventCallback_t windowEventCallback;
+
+	void initializeWindow(const wchar_t* title);
 
 public:
 	WindowRenderer();
 	~WindowRenderer();
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void initializeWindow( void );
-	void createWindow(const wchar_t* title);
+	void createWindow(const wchar_t* title, windowEventCallback_t callback);
 };

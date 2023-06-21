@@ -31,7 +31,6 @@ FluxworksEngine::FluxworksEngine()
 	this->_previousTickTime = std::chrono::high_resolution_clock::now();
 
 	this->window = WindowRenderer();
-	this->window.initializeWindow();
 }
 
 FluxworksEngine::~FluxworksEngine()
@@ -41,6 +40,11 @@ FluxworksEngine::~FluxworksEngine()
 void FluxworksEngine::registerEventHandler(_FluxworksEventHandlerBase* eventHandler)
 {
 	this->_eventDispatcher.registerHandler(eventHandler);
+}
+
+void FluxworksEngine::windowEventCallback(FluxworksEvent* event)
+{
+	std::cout << "windowCallback" << std::endl;
 }
 
 bool FluxworksEngine::isRunning()
@@ -71,7 +75,7 @@ void FluxworksEngine::start()
 
 void FluxworksEngine::createWindow(const wchar_t* title)
 {
-	this->window.createWindow(title);
+	this->window.createWindow(title, &(FluxworksEngine::windowEventCallback));
 }
 
 
@@ -113,6 +117,8 @@ void FluxworksEngine::_loop()
 	
 	return;
 }
+
+
 
 TickEvent::TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time)
 {
