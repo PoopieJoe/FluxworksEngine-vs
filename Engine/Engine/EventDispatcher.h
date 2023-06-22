@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 /// <summary>
-/// Base Event class from which all (custom) events may inherit
+/// Base Event class from which all events must inherit
 /// </summary>
 class FluxworksEvent 
 {

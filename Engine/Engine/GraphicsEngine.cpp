@@ -25,6 +25,7 @@
 #include "WindowsMessageMap.h"
 
 #include "ErrorTypes.h"
+#include "EventTypes.h"
 #include "EventDispatcher.h"
 
 static Direct3D11API dx3dapi = Direct3D11API();
@@ -33,17 +34,21 @@ MainWindow::MainWindow(std::shared_ptr<FluxworksEventDispatcher> evd, const wcha
 {
     this->evd = evd;
     this->title = title;
-    WNDCLASS wc = {0};
+    WNDCLASSEX wc = {0};
 
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hInstance = reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL));
-    wc.hbrBackground = NULL;
-    wc.lpszClassName = L"FluxworksEngineWindow";
+    wc.cbSize = sizeof(wc);
     wc.style = CS_OWNDC;
     wc.lpfnWndProc = WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hInstance = reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL));
+    wc.hbrBackground = nullptr;
+    wc.lpszMenuName = nullptr;
+    wc.lpszClassName = L"FluxworksEngineWindow";
     wc.hIcon = NULL;
 
-    RegisterClass(&wc);
+    RegisterClassEx(&wc);
 
     assert(!m_window);
 
@@ -51,8 +56,8 @@ MainWindow::MainWindow(std::shared_ptr<FluxworksEventDispatcher> evd, const wcha
         wc.lpszClassName,
         title,
         WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT,
-        CW_USEDEFAULT, CW_USEDEFAULT,
+        200, 200, //(x,y)
+        480, 360, //(w,h)
         nullptr,
         nullptr,
         wc.hInstance,
@@ -68,8 +73,7 @@ LRESULT MainWindow::MessageHandler(
     LPARAM const lparam
 ) {
     static WindowsMessageMap wmm; // message map for debug
-    std::cout << wmm(message, wparam, lparam).c_str() << std::endl;
-
+    if (message != WM_PAINT) std::cout << wmm(message, wparam, lparam).c_str() << std::endl;
 
     switch (message)
     {
@@ -78,19 +82,82 @@ LRESULT MainWindow::MessageHandler(
         PaintHandler();
         return 0;
     }
+    case WM_KEYDOWN:
+    {
+        this->evd->dispatchEvent(new KeyDown(wparam,lparam >> 29));
+        return 0;
+    }
     case WM_LBUTTONDOWN:
     {
-        this->evd->dispatchEvent(new WindowEvents::Mouse::LMBDown(this->m_window, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
+        InputModifiers mod = InputModifiers(
+            wparam & MK_LBUTTON,
+            wparam & MK_MBUTTON,
+            wparam & MK_RBUTTON,
+            wparam & MK_CONTROL,
+            wparam & MK_SHIFT,
+            false,
+            wparam & MK_XBUTTON1,
+            wparam & MK_XBUTTON2
+        );
+
+        this->evd->dispatchEvent(new MouseButtonDown(MouseButton::LeftMouseButton, mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
+        return 0;
+    }
+    case WM_MBUTTONDOWN:
+    {
+        InputModifiers mod = InputModifiers(
+            wparam & MK_LBUTTON,
+            wparam & MK_MBUTTON,
+            wparam & MK_RBUTTON,
+            wparam & MK_CONTROL,
+            wparam & MK_SHIFT,
+            false,
+            wparam & MK_XBUTTON1,
+            wparam & MK_XBUTTON2
+        );
+
+        this->evd->dispatchEvent(new MouseButtonDown(MouseButton::MiddleMouseButton, mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
+        return 0;
+    }
+    case WM_RBUTTONDOWN:
+    {
+        InputModifiers mod = InputModifiers(
+            wparam & MK_LBUTTON,
+            wparam & MK_MBUTTON,
+            wparam & MK_RBUTTON,
+            wparam & MK_CONTROL,
+            wparam & MK_SHIFT,
+            false,
+            wparam & MK_XBUTTON1,
+            wparam & MK_XBUTTON2
+        );
+
+        this->evd->dispatchEvent(new MouseButtonDown(MouseButton::RightMouseButton, mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
         return 0;
     }
     case WM_CREATE:
     {
-        this->evd->dispatchEvent(new WindowEvents::Open(this->m_window));
+        this->evd->dispatchEvent(new Open(this->m_window));
         return 0;
     }
     case WM_CLOSE:
     {
-        this->evd->dispatchEvent(new WindowEvents::Close(this->m_window));
+        this->evd->dispatchEvent(new Close(this->m_window));
+        return 0;
+    }
+    case WM_MOUSEMOVE:
+    {
+        InputModifiers mod = InputModifiers(
+            wparam & MK_LBUTTON,
+            wparam & MK_MBUTTON,
+            wparam & MK_RBUTTON,
+            wparam & MK_CONTROL,
+            wparam & MK_SHIFT,
+            false,
+            wparam & MK_XBUTTON1,
+            wparam & MK_XBUTTON2
+        );
+        this->evd->dispatchEvent(new MouseMove(mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
         return 0;
     }
     }
@@ -106,7 +173,6 @@ void MainWindow::PaintHandler()
     // Render . . .
 }
 
-
 template <typename T>
 T* Window<T>::GetThisFromHandle(HWND window)
 {
@@ -115,7 +181,7 @@ T* Window<T>::GetThisFromHandle(HWND window)
             window,
             GWLP_USERDATA
         )
-        );
+    );
 }
 
 template <typename T>

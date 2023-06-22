@@ -150,12 +150,15 @@
     <ClInclude Include="FluxworksEngine.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GraphicsEngine.h" />
+    <ClInclude Include="EventTypes.h" />
+    <ClInclude Include="Logging.h" />
     <ClInclude Include="UserInput.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="WindowsMessageMap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="EventTypes.cpp" />
     <ClCompile Include="FluxworksEngine.cpp" />
     <ClCompile Include="GraphicsEngine.cpp" />
     <ClCompile Include="pch.cpp">

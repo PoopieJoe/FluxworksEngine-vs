@@ -21,19 +21,28 @@ public:
     }
 };
 
-class LMBDownHandler : public FluxworksEventHandler<WindowEvents::Mouse::LMBDown>
+//class LMBDownHandler : public FluxworksEventHandler<MouseLMBDown>
+//{
+//public:
+//    void handler(MouseLMBDown* event)
+//    {
+//        std::cout << "MouseLMBDown (" << event->x << "," << event->y  << ")" << std::endl;
+//    }
+//};
+
+class MouseClickHandler : public FluxworksEventHandler<MouseButtonDown>
 {
 public:
-    void handler(WindowEvents::Mouse::LMBDown* event)
+    void handler(MouseButtonDown* event)
     {
-        std::cout << "LMBDown (" << event->x << "," << event->y  << ")" << std::endl;
+        
     }
 };
 
-class WindowCloseHandler : public FluxworksEventHandler<WindowEvents::Close>
+class WindowCloseHandler : public FluxworksEventHandler<Close>
 {
 public:
-    void handler(WindowEvents::Close* event)
+    void handler(Close* event)
     {
         gameEngine.stop();
     }
@@ -44,7 +53,7 @@ int main()
     gameEngine.tickFrameDuration = std::chrono::duration<double>(1.0/2.0);
     gameEngine.registerEventHandlers({ 
         new TickHandler, 
-        new LMBDownHandler, 
+        new MouseClickHandler,
         new WindowCloseHandler 
     });
 

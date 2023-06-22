@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include "EventDispatcher.h"
+#include "EventTypes.h"
 
 
 #define IDS_APP_TITLE			103
@@ -42,56 +43,7 @@
 #define IDC_STATIC				-1
 #endif
 
-struct WindowEvents 
-{
-    struct Mouse
-    {
-        struct Position : public FluxworksEvent
-        {
-            Position(HWND windowHandle, long x, long y) : FluxworksEvent("WindowEvents::Mouse::Position")
-            {
-                this->windowHandle = windowHandle;
-                this->x = x;
-                this->y = y;
-            }
-            HWND windowHandle;
-            long x;
-            long y;
-        };
 
-        struct LMBDown : public FluxworksEvent
-        {
-            LMBDown(HWND windowHandle, long x, long y) : FluxworksEvent("WindowEvents::Mouse::LMBDown")
-            {
-                this->windowHandle = windowHandle;
-                this->x = x;
-                this->y = y;
-            }
-            HWND windowHandle;
-            long x;
-            long y;
-        };
-      
-    };
-
-    struct Open : public FluxworksEvent
-    {
-        Open(HWND windowHandle) : FluxworksEvent("WindowEvents::Open")
-        {
-            this->windowHandle = windowHandle;
-        }
-        HWND windowHandle;
-    };
-
-    struct Close : public FluxworksEvent
-    {
-        Close(HWND windowHandle) : FluxworksEvent("WindowEvents::Close")
-        {
-            this->windowHandle = windowHandle;
-        }
-        HWND windowHandle;
-    };
-};
 
 // Create the Direct3D 11 API device object and a corresponding context.
 struct Direct3D11API {
