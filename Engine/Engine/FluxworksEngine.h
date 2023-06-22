@@ -7,7 +7,7 @@
 #endif // FLUXWORKSENGINE_EXPORTS
 
 #include <chrono>
-#include <windows.h>
+#include "WindowsIncludes.h"
 #include <memory>
 #include "EventDispatcher.h"
 #include "GraphicsEngine.h"

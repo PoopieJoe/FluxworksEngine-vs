@@ -152,8 +152,8 @@
     <ClInclude Include="GraphicsEngine.h" />
     <ClInclude Include="EventTypes.h" />
     <ClInclude Include="Logging.h" />
-    <ClInclude Include="UserInput.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="WindowsIncludes.h" />
     <ClInclude Include="WindowsMessageMap.h" />
   </ItemGroup>
   <ItemGroup>
@@ -168,7 +168,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="EventDispatcher.cpp" />
-    <ClCompile Include="UserInput.cpp" />
     <ClCompile Include="WindowsMessageMap.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
