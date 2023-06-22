@@ -80,14 +80,26 @@ void FluxworksEngine::createWindow(const wchar_t* title)
 	std::thread windowThread([this,title]()
 	{
 		MainWindow window = MainWindow(this->_eventDispatcher,title);
-		MSG message;
+		MSG message = MSG();
 
-		while (GetMessage(&message,
-			nullptr,
-			0,
-			0))
+		while (WM_QUIT != message.message)
 		{
-			DispatchMessage(&message);
+			bool bGotMsg = (PeekMessage(&message, NULL, 0U, 0U, PM_REMOVE) != 0);
+
+			if (bGotMsg)
+			{
+				// Translate and dispatch the message
+				TranslateMessage(&message);
+				DispatchMessage(&message);
+			}
+			else
+			{
+				// Update the scene.
+
+				// Render frames during idle time (when no messages are waiting).
+
+				// Present the frame to the screen.
+			}
 		}
 	});
 	windowThread.detach();
@@ -113,10 +125,11 @@ void FluxworksEngine::_loop()
 
 
 	// Tick
-	this->_eventDispatcher->dispatchEvent(new TickEvent(
-		dt,
-		t
-	));
+	// DISABLED WHILE IM DOING GRAPHICS THINGS
+	//this->_eventDispatcher->dispatchEvent(new TickEvent(
+	//	dt,
+	//	t
+	//));
 
 	// Put thread to sleep until next tick starts
 	// If tickframe overrun -> skip

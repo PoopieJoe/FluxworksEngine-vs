@@ -41,6 +41,7 @@ public:
 
 int main()
 {
+    gameEngine.tickFrameDuration = std::chrono::duration<double>(1.0/2.0);
     gameEngine.registerEventHandlers({ 
         new TickHandler, 
         new LMBDownHandler, 
