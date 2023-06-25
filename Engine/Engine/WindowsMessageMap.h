@@ -20,8 +20,10 @@
 *	along with The Chili Direct3D Engine.  If not, see <http://www.gnu.org/licenses/>.    *
 ******************************************************************************************/
 #pragma once
+
+#include "pch.h"
+
 #include <unordered_map>
-#include <windows.h>
 #include <iostream>
 
 class WindowsMessageMap

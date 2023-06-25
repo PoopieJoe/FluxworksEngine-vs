@@ -10,4 +10,32 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
+// General
+#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <thread>
+#include <utility>
+#include <stdlib.h>
+
+// Data structs
+#include <string>
+#include <stack>
+#include <deque>
+#include <array>
+#include <vector>
+#include <set>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
+
+// Windows Header Files
+#include "WindowsIncludes.h"
+#include <windowsx.h>
+#include <winnt.h>
+
+// Microsoft Header
+#include <wrl.h>  
+
 #endif //PCH_H

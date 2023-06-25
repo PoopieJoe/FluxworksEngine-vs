@@ -1,16 +1,7 @@
 #pragma once
+#include "pch.h"
 
 #include <thread>
-
-
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-// Windows Header Files
-#include "WindowsIncludes.h"
-#include <windowsx.h>
-#include <winnt.h>
-
-// Microsoft Header
-#include <wrl.h>  
 
 // DirectX 3D 11
 #include <d3d11.h>
@@ -18,7 +9,6 @@
 
 // C RunTime Header Files
 #include <assert.h>
-#include <stdlib.h>
 #include <memory>
 #include <tchar.h>
 #include <thread>

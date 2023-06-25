@@ -6,11 +6,12 @@
 #define FLUXWORKSENGINE_API __declspec(dllimport)
 #endif // FLUXWORKSENGINE_EXPORTS
 
+#include "pch.h"
+
 #include <chrono>
-#include "WindowsIncludes.h"
 #include <memory>
 #include "EventDispatcher.h"
-#include "GraphicsEngine.h"
+#include "Window.h"
 
 
 /// <summary>

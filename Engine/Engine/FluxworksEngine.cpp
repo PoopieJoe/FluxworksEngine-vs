@@ -6,7 +6,7 @@
 #include <functional>
 
 #include "FluxworksEngine.h"
-#include "GraphicsEngine.h"
+#include "Window.h"
 #include "ErrorTypes.h"
 #include "EventDispatcher.h"
 
