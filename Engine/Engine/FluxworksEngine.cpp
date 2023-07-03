@@ -1,9 +1,5 @@
 #include "pch.h"
-#include "WindowsIncludes.h"
-#include <iostream>
 #include <chrono>
-#include <thread>
-#include <functional>
 
 #include "FluxworksEngine.h"
 #include "Window.h"
@@ -75,22 +71,21 @@ void FluxworksEngine::start()
 	}
 }
 
-void FluxworksEngine::createWindow(const wchar_t* title)
+void FluxworksEngine::createWindow(int width, int height, const char* name)
 {
-	std::thread windowThread([this,title]()
+	std::thread windowThread([this, width, height, name]()
 	{
-		MainWindow window = MainWindow(this->_eventDispatcher,title);
+		FluxworksEngineWindow window(width, height, name, this->_eventDispatcher);
 		MSG message = MSG();
-
 		while (WM_QUIT != message.message)
 		{
-			bool bGotMsg = (PeekMessage(&message, NULL, 0U, 0U, PM_REMOVE) != 0);
+			bool bGotMsg = (PeekMessageA(&message, NULL, 0U, 0U, PM_REMOVE) != 0);
 
 			if (bGotMsg)
 			{
 				// Translate and dispatch the message
 				TranslateMessage(&message);
-				DispatchMessage(&message);
+				DispatchMessageA(&message);
 			}
 			else
 			{

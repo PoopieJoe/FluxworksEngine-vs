@@ -6,9 +6,9 @@ void FluxworksEventDispatcher::registerHandler(_FluxworksEventHandlerBase* event
     this->handlers.insert(eventHandler);
 }
 
-void FluxworksEventDispatcher::dispatchEvent(FluxworksEvent* event)
+void FluxworksEventDispatcher::dispatchEvent(FluxworksEvent* event, bool log)
 {
-    std::cout << "<" << event->typeName << ">" << std::endl;
+    if (log) std::cout << "<" << event->typeName << ">" << std::endl;
     for (const auto& elem : this->handlers)
     {
         elem->handler(event);

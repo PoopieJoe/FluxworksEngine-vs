@@ -18,6 +18,9 @@
 #include <thread>
 #include <utility>
 #include <stdlib.h>
+#include <exception>
+#include <stdexcept>
+
 
 // Data structs
 #include <string>

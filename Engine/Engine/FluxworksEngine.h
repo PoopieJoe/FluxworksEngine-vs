@@ -69,7 +69,7 @@ public:
 	/// </summary>
 	void start();
 
-	void createWindow(const wchar_t* title);
+	void createWindow(int width, int height, const char* name);
 
 	/// <summary>
 	/// Stops the game engine. If the engine is not running,

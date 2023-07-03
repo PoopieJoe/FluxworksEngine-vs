@@ -17,66 +17,43 @@
 #include "EventDispatcher.h"
 #include "EventTypes.h"
 
-
-#define IDS_APP_TITLE			103
-
-#define IDR_MAINFRAME			128
-#define IDD_VSENGINEPROJECT_DIALOG	102
-#define IDD_ABOUTBOX			103
-#define IDM_ABOUT				104
-#define IDM_EXIT				105
-#define IDI_VSENGINEPROJECT			107
-#define IDI_SMALL				108
-#define IDC_VSENGINEPROJECT			109
-#define IDC_MYICON				2
-#ifndef IDC_STATIC
-#define IDC_STATIC				-1
-#endif
-
-
-
-// Create the Direct3D 11 API device object and a corresponding context.
-struct Direct3D11API {
-    Microsoft::WRL::ComPtr<ID3D11Device>        device;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
-};
-
-template <typename T>
-struct Window
+class FluxworksEngineWindow
 {
-    HWND m_window = nullptr;
+public:
+	class WindowClass
+	{
+	public:
+		WindowClass();
+		~WindowClass();
+		//delete copy constructors
+		WindowClass(const WindowClass&) = delete;
+		WindowClass& operator=(const WindowClass&) = delete;
 
-    static T* GetThisFromHandle(HWND window);
+		static const char* GetName(void);
+		static HINSTANCE GetInstance(void);
+		static WindowClass wndClass;
 
-    static LRESULT CALLBACK WndProc
-    (
-        HWND   const window,
-        UINT   const message,
-        WPARAM const wparam,
-        LPARAM const lparam
-    );
+	private:
+		static constexpr const char* wndClassName = "FluxworksEngineWindow";
+		
+		HINSTANCE hInst;
 
-    LRESULT MessageHandler(
-        UINT   const message,
-        WPARAM const wparam,
-        LPARAM const lparam
-    );
-};
+	};
 
-struct MainWindow : Window<MainWindow>
-{
-    std::shared_ptr<FluxworksEventDispatcher> evd;
-    const wchar_t* title;
-
-
-
-    MainWindow(std::shared_ptr<FluxworksEventDispatcher> evd, const wchar_t* title);
-
-    LRESULT MessageHandler(
-        UINT message,
-        WPARAM const wparam,
-        LPARAM const lparam
-    );
-
-    void PaintHandler();
+public:
+	FluxworksEngineWindow(int width, int height, const char* name, std::shared_ptr<FluxworksEventDispatcher> eventDispatcher);
+	~FluxworksEngineWindow();
+	//delete copy constructors
+	FluxworksEngineWindow(const FluxworksEngineWindow&) = delete;
+	FluxworksEngineWindow& operator=(const FluxworksEngineWindow&) = delete;
+private:
+	static LRESULT CALLBACK HandeMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK HandeMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+private:
+	std::shared_ptr<FluxworksEventDispatcher> evd;
+	int width;
+	int height;
+	HWND hWnd;
+	WindowClass cls;
 };

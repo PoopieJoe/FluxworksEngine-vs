@@ -4,13 +4,6 @@
 #include <thread>
 #include <iostream>
 
-// Windows Header Files
-#include "WindowsIncludes.h"
-#include <windowsx.h>
-
-// Microsoft Header
-#include <wrl.h>  
-
 // DirectX 3D 11
 #include <d3d11.h>
 #include <d3d11_2.h>
@@ -27,221 +20,195 @@
 #include "EventTypes.h"
 #include "EventDispatcher.h"
 
-static Direct3D11API dx3dapi = Direct3D11API();
+FluxworksEngineWindow::WindowClass FluxworksEngineWindow::WindowClass::wndClass;
 
-MainWindow::MainWindow(std::shared_ptr<FluxworksEventDispatcher> evd, const wchar_t* title)
+const char* FluxworksEngineWindow::WindowClass::GetName(void)
 {
-    this->evd = evd;
-    this->title = title;
-    WNDCLASSEX wc = {0};
-
-    wc.cbSize = sizeof(wc);
-    wc.style = CS_OWNDC;
-    wc.lpfnWndProc = WndProc;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hInstance = reinterpret_cast<HINSTANCE>(GetModuleHandle(NULL));
-    wc.hbrBackground = nullptr;
-    wc.lpszMenuName = nullptr;
-    wc.lpszClassName = L"FluxworksEngineWindow";
-    wc.hIcon = NULL;
-
-    RegisterClassEx(&wc);
-
-    assert(!m_window);
-
-    CreateWindow(
-        wc.lpszClassName,
-        title,
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-        200, 200, //(x,y)
-        480, 360, //(w,h)
-        nullptr,
-        nullptr,
-        wc.hInstance,
-        this
-    );
-
-    assert(m_window);
+	return wndClassName;
 }
 
-LRESULT MainWindow::MessageHandler(
-    UINT message,
-    WPARAM const wparam,
-    LPARAM const lparam
-) {
-    static WindowsMessageMap wmm; // message map for debug
-    if (message != WM_PAINT) std::cout << wmm(message, wparam, lparam).c_str() << std::endl;
-
-    switch (message)
-    {
-    case WM_PAINT:
-    {
-        PaintHandler();
-        return 0;
-    }
-    case WM_KEYDOWN:
-    {
-        this->evd->dispatchEvent(new KeyDown(wparam,lparam >> 29));
-        return 0;
-    }
-    case WM_LBUTTONDOWN:
-    {
-        InputModifiers mod = InputModifiers(
-            wparam & MK_LBUTTON,
-            wparam & MK_MBUTTON,
-            wparam & MK_RBUTTON,
-            wparam & MK_CONTROL,
-            wparam & MK_SHIFT,
-            false,
-            wparam & MK_XBUTTON1,
-            wparam & MK_XBUTTON2
-        );
-
-        this->evd->dispatchEvent(new MouseButtonDown(MouseButton::LeftMouseButton, mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
-        return 0;
-    }
-    case WM_MBUTTONDOWN:
-    {
-        InputModifiers mod = InputModifiers(
-            wparam & MK_LBUTTON,
-            wparam & MK_MBUTTON,
-            wparam & MK_RBUTTON,
-            wparam & MK_CONTROL,
-            wparam & MK_SHIFT,
-            false,
-            wparam & MK_XBUTTON1,
-            wparam & MK_XBUTTON2
-        );
-
-        this->evd->dispatchEvent(new MouseButtonDown(MouseButton::MiddleMouseButton, mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
-        return 0;
-    }
-    case WM_RBUTTONDOWN:
-    {
-        InputModifiers mod = InputModifiers(
-            wparam & MK_LBUTTON,
-            wparam & MK_MBUTTON,
-            wparam & MK_RBUTTON,
-            wparam & MK_CONTROL,
-            wparam & MK_SHIFT,
-            false,
-            wparam & MK_XBUTTON1,
-            wparam & MK_XBUTTON2
-        );
-
-        this->evd->dispatchEvent(new MouseButtonDown(MouseButton::RightMouseButton, mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
-        return 0;
-    }
-    case WM_CREATE:
-    {
-        this->evd->dispatchEvent(new Open(this->m_window));
-        return 0;
-    }
-    case WM_CLOSE:
-    {
-        this->evd->dispatchEvent(new Close(this->m_window));
-        return 0;
-    }
-    case WM_MOUSEMOVE:
-    {
-        InputModifiers mod = InputModifiers(
-            wparam & MK_LBUTTON,
-            wparam & MK_MBUTTON,
-            wparam & MK_RBUTTON,
-            wparam & MK_CONTROL,
-            wparam & MK_SHIFT,
-            false,
-            wparam & MK_XBUTTON1,
-            wparam & MK_XBUTTON2
-        );
-        this->evd->dispatchEvent(new MouseMove(mod, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)));
-        return 0;
-    }
-    }
-    return __super::MessageHandler(
-        message,
-        wparam,
-        lparam
-    );
-}
-
-void MainWindow::PaintHandler()
+HINSTANCE FluxworksEngineWindow::WindowClass::GetInstance(void)
 {
-    // Render . . .
+	return wndClass.hInst;
 }
 
-template <typename T>
-T* Window<T>::GetThisFromHandle(HWND window)
+FluxworksEngineWindow::WindowClass::WindowClass()
+	: hInst ( GetModuleHandle( NULL ) )
 {
-    return reinterpret_cast<T*>(
-        GetWindowLongPtr(
-            window,
-            GWLP_USERDATA
-        )
-    );
+	WNDCLASSEX wc = { NULL }; // zero out config
+	wc.cbSize = sizeof(wc);
+	wc.style = CS_OWNDC;
+	wc.lpfnWndProc = HandeMsgSetup;
+	wc.cbClsExtra = 0; // no extra bytes allocated for window class
+	wc.cbWndExtra = 0; // no extra bytes allocated for window instance
+	wc.hInstance = GetInstance();
+	wc.hIcon = NULL;
+	wc.hCursor = nullptr;// LoadCursor(nullptr, IDC_ARROW);
+	wc.hbrBackground = nullptr;
+	wc.lpszMenuName = nullptr;
+	wc.lpszClassName = L"FluxworksEngineWindow";//WindowClass::GetName();
+	wc.hIconSm = NULL;
+
+	RegisterClassEx( &wc );
 }
 
-template <typename T>
-LRESULT CALLBACK Window<T>::WndProc
-(
-    HWND   const window,
-    UINT   const message,
-    WPARAM const wparam,
-    LPARAM const lparam
-) {
-    assert(window);
-
-    if (WM_NCCREATE == message)
-    {
-        CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lparam);
-        T* that = static_cast<T*>(cs->lpCreateParams);
-
-        assert(that);
-        assert(!that->m_window);
-
-        that->m_window = window;
-
-        SetWindowLongPtr(
-            window,
-            GWLP_USERDATA,
-            reinterpret_cast<LONG_PTR>(that)
-        );
-    }
-    else if (T* that = GetThisFromHandle(window))
-    {
-        return that->MessageHandler(
-            message,
-            wparam,
-            lparam
-        );
-    }
-
-    return DefWindowProc(
-        window,
-        message,
-        wparam,
-        lparam
-    );
+FluxworksEngineWindow::WindowClass::~WindowClass()
+{
+	UnregisterClassA(wndClassName, GetInstance());
 }
 
-template <typename T>
-LRESULT Window<T>::MessageHandler(
-    UINT   const message,
-    WPARAM const wparam,
-    LPARAM const lparam
-) {
-    if (WM_DESTROY == message)
+FluxworksEngineWindow::FluxworksEngineWindow(int width, int height, const char* name, std::shared_ptr<FluxworksEventDispatcher> eventDispatcher)
+	: width( width ), height( height ), evd(eventDispatcher)
+{
+	const DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
+	RECT windowRegion;
+	windowRegion.left = 100;
+	windowRegion.right = width + windowRegion.left;
+	windowRegion.top = 100;
+	windowRegion.bottom = height + windowRegion.top;
+	if (AdjustWindowRect(&windowRegion, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0)
+	{
+		throw std::runtime_error("Invalid Window Region");
+	}
+	hWnd = CreateWindowExA(WS_EX_LEFT,
+		WindowClass::GetName(), name,
+		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
+		CW_USEDEFAULT, CW_USEDEFAULT, windowRegion.right - windowRegion.left, windowRegion.bottom - windowRegion.top,
+		nullptr, nullptr, WindowClass::GetInstance(), this
+	);
+	if (hWnd == NULL)
+	{
+		throw std::runtime_error("Invalid Window Handler");
+	}
+	ShowWindow(hWnd, SW_SHOWDEFAULT);
+
+}
+
+FluxworksEngineWindow::~FluxworksEngineWindow()
+{
+	DestroyWindow(hWnd);
+}
+
+LRESULT CALLBACK FluxworksEngineWindow::HandeMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_NCCREATE)
+	{
+		// reinterpret lParam to the window creation data struct
+		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
+		// fetch pointer to FluxworksEngineWindow instance from creation data
+		FluxworksEngineWindow* const pWnd = static_cast<FluxworksEngineWindow*>(pCreate->lpCreateParams);
+		// set the user data associated with the window
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWnd));
+		// change static window handle function to HandeMsgThunk
+		SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&FluxworksEngineWindow::HandeMsgThunk));
+		// Forward message to instance handler
+		return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
+	}
+
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+LRESULT CALLBACK FluxworksEngineWindow::HandeMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	// this cursed line fetches the pointer to the window instance
+	FluxworksEngineWindow* const pWnd = 
+		reinterpret_cast<FluxworksEngineWindow*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	// Now forward it to the window instance handler
+	return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
+}
+
+LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	// Window-specific message handling
+    //static WindowsMessageMap wmm; // message map for debug
+    //if (msg != WM_PAINT) std::cout << wmm(msg, wParam, lParam).c_str() << std::endl;
+
+    switch (msg)
     {
-        PostQuitMessage(0);
-        return 0;
+        case WM_PAINT:
+        {
+            break;
+        }
+        case WM_KEYDOWN:
+        {
+            this->evd->dispatchEvent(new KeyDown(wParam, lParam >> 29), false);
+            return 0;
+        }
+        case WM_LBUTTONDOWN:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            this->evd->dispatchEvent(new MouseButtonDown(MouseButton::LeftMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            return 0;
+        }
+        case WM_MBUTTONDOWN:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            this->evd->dispatchEvent(new MouseButtonDown(MouseButton::MiddleMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            return 0;
+        }
+        case WM_RBUTTONDOWN:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            this->evd->dispatchEvent(new MouseButtonDown(MouseButton::RightMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            return 0;
+        }
+        case WM_CREATE:
+        {
+            this->evd->dispatchEvent(new Open(this->hWnd), false);
+            return 0;
+        }
+        case WM_CLOSE:
+        {
+            this->evd->dispatchEvent(new Close(this->hWnd), false);
+            return 0;
+        }
+        case WM_MOUSEMOVE:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+            this->evd->dispatchEvent(new MouseMove(mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            return 0;
+        }
     }
 
-    return DefWindowProc(
-        this->m_window,
-        message,
-        wparam,
-        lparam
-    );
+	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
+

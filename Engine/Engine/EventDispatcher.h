@@ -79,7 +79,7 @@ public:
 	/// [registerHandler], of the event type.
 	/// </summary>
 	/// <param name="event">Event to dispatch</param>
-	void dispatchEvent(FluxworksEvent* event);
+	void dispatchEvent(FluxworksEvent* event, bool log = true);
 
 	void queueEvent(FluxworksEvent* event);
 	void dispatchQueue(void);
