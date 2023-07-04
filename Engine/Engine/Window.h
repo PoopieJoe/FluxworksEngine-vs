@@ -15,7 +15,6 @@
 #include <iostream>
 
 #include "EventDispatcher.h"
-#include "EventTypes.h"
 
 class FluxworksEngineWindow
 {
@@ -46,11 +45,15 @@ public:
 	//delete copy constructors
 	FluxworksEngineWindow(const FluxworksEngineWindow&) = delete;
 	FluxworksEngineWindow& operator=(const FluxworksEngineWindow&) = delete;
+
+	inline const uintptr_t identifier() {return reinterpret_cast<const uintptr_t>(this->hWnd);}
+	const char* name;
+
 private:
 	static LRESULT CALLBACK HandeMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK HandeMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-private:
+
 	std::shared_ptr<FluxworksEventDispatcher> evd;
 	int width;
 	int height;

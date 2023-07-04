@@ -20,6 +20,8 @@
 #include "EventTypes.h"
 #include "EventDispatcher.h"
 
+// TODO: Keyboard and Mouse interactions need to be moved to dedicated input libraries and namespaces
+
 FluxworksEngineWindow::WindowClass FluxworksEngineWindow::WindowClass::wndClass;
 
 const char* FluxworksEngineWindow::WindowClass::GetName(void)
@@ -58,7 +60,7 @@ FluxworksEngineWindow::WindowClass::~WindowClass()
 }
 
 FluxworksEngineWindow::FluxworksEngineWindow(int width, int height, const char* name, std::shared_ptr<FluxworksEventDispatcher> eventDispatcher)
-	: width( width ), height( height ), evd(eventDispatcher)
+	: width( width ), height( height ), name(name), evd(eventDispatcher)
 {
 	const DWORD windowStyle = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 	RECT windowRegion;
@@ -125,15 +127,52 @@ LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPA
 
     switch (msg)
     {
+        case WM_NCCREATE:
+        {
+            this->hWnd = hWnd; // this should already have been set in the constructor, but it isn't and I don't know why
+            break;
+        }
+        case WM_CREATE:
+        {
+            this->evd->dispatchEvent(new WindowEvents::Open(this), false);
+            return 0;
+        }
+        case WM_CLOSE:
+        {
+            this->evd->dispatchEvent(new WindowEvents::Close(this), false);
+            return 0;
+        }
         case WM_PAINT:
         {
             break;
         }
+
+        //* KEYBOARD BUTTONS *//
+
+        // TODO alt keys broken but that's okay
+        case WM_SYSKEYDOWN:
         case WM_KEYDOWN:
         {
-            this->evd->dispatchEvent(new KeyDown(wParam, lParam >> 29), false);
+            // no autorepeat
+            if (!(lParam & 0x40000000)) 
+            {
+                this->evd->dispatchEvent(new WindowEvents::KeyDown(this, static_cast<unsigned int>(wParam)), false);
+            }
+            
             return 0;
         }
+
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+        {
+            this->evd->dispatchEvent(new WindowEvents::KeyUp(this, static_cast<unsigned int>(wParam)), false);
+            return 0;
+        }
+
+        //* END OF KEYBOARD BUTTONS *//
+
+        //* MOUSE BUTTONS *//
+
         case WM_LBUTTONDOWN:
         {
             InputModifiers mod = InputModifiers(
@@ -147,7 +186,23 @@ LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPA
                 wParam & MK_XBUTTON2
             );
 
-            this->evd->dispatchEvent(new MouseButtonDown(MouseButton::LeftMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            this->evd->dispatchEvent(new WindowEvents::MouseButtonDown(this, MouseButton::LeftMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            return 0;
+        }
+        case WM_LBUTTONUP:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            this->evd->dispatchEvent(new WindowEvents::MouseButtonUp(this, MouseButton::LeftMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
             return 0;
         }
         case WM_MBUTTONDOWN:
@@ -163,7 +218,23 @@ LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPA
                 wParam & MK_XBUTTON2
             );
 
-            this->evd->dispatchEvent(new MouseButtonDown(MouseButton::MiddleMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            this->evd->dispatchEvent(new WindowEvents::MouseButtonDown(this, MouseButton::MiddleMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            return 0;
+        }
+        case WM_MBUTTONUP:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            this->evd->dispatchEvent(new WindowEvents::MouseButtonUp(this, MouseButton::MiddleMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
             return 0;
         }
         case WM_RBUTTONDOWN:
@@ -179,17 +250,23 @@ LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPA
                 wParam & MK_XBUTTON2
             );
 
-            this->evd->dispatchEvent(new MouseButtonDown(MouseButton::RightMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            this->evd->dispatchEvent(new WindowEvents::MouseButtonDown(this, MouseButton::RightMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
             return 0;
         }
-        case WM_CREATE:
+        case WM_RBUTTONUP:
         {
-            this->evd->dispatchEvent(new Open(this->hWnd), false);
-            return 0;
-        }
-        case WM_CLOSE:
-        {
-            this->evd->dispatchEvent(new Close(this->hWnd), false);
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            this->evd->dispatchEvent(new WindowEvents::MouseButtonUp(this, MouseButton::RightMouseButton, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
             return 0;
         }
         case WM_MOUSEMOVE:
@@ -204,9 +281,28 @@ LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPA
                 wParam & MK_XBUTTON1,
                 wParam & MK_XBUTTON2
             );
-            this->evd->dispatchEvent(new MouseMove(mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+            this->evd->dispatchEvent(new WindowEvents::MouseMove(this, mod, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
             return 0;
         }
+        case WM_MOUSEWHEEL:
+        {
+            InputModifiers mod = InputModifiers(
+                wParam & MK_LBUTTON,
+                wParam & MK_MBUTTON,
+                wParam & MK_RBUTTON,
+                wParam & MK_CONTROL,
+                wParam & MK_SHIFT,
+                false,
+                wParam & MK_XBUTTON1,
+                wParam & MK_XBUTTON2
+            );
+
+            const POINTS pt = MAKEPOINTS(lParam);
+            const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+            this->evd->dispatchEvent(new WindowEvents::MouseWheel(this, mod, delta, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)), false);
+        }
+
+        //* END OF MOUSE BUTTONS *//
     }
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);

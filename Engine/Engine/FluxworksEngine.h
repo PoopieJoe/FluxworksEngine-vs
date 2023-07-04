@@ -12,6 +12,7 @@
 #include <memory>
 #include "EventDispatcher.h"
 #include "Window.h"
+#include "EventTypes.h"
 
 
 /// <summary>

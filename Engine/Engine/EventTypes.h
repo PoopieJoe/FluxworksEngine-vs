@@ -1,8 +1,10 @@
 #pragma once
 #include "pch.h"
 #include "EventDispatcher.h"
+#include "Window.h"
 
 #define _BASEEVT(x) FluxworksEvent(#x)
+
 
 struct InputModifiers {
     InputModifiers(
@@ -34,61 +36,95 @@ enum class MouseButton {
     XButton2
 };
 
-
-struct KeyDown : public FluxworksEvent
+namespace WindowEvents 
 {
-    KeyDown(int key, bool held) : _BASEEVT(KeyDown)
+    struct KeyDown : public FluxworksEvent
     {
-        this->key = key;
-        this->held = held;
-    }
-    int key;
-    bool held;
+        KeyDown(FluxworksEngineWindow* windowInstance, unsigned int key) : _BASEEVT(KeyDown),
+            windowInstance(windowInstance), key(key)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+        unsigned int key;
 
-};
+    };
 
-struct MouseMove : public FluxworksEvent
-{
-    MouseMove(InputModifiers modifier, long x, long y) : _BASEEVT(MouseMove)
+    struct KeyUp : public FluxworksEvent
     {
-        this->modifier = modifier;
-        this->x = x;
-        this->y = y;
-    }
-    InputModifiers modifier;
-    long x;
-    long y;
-};
+        KeyUp(FluxworksEngineWindow* windowInstance, unsigned int key) : _BASEEVT(KeyUp),
+            windowInstance(windowInstance), key(key)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+        unsigned int key;
+    };
 
-struct MouseButtonDown : public FluxworksEvent
-{
-    MouseButtonDown(MouseButton button, InputModifiers modifiers, long x, long y) : _BASEEVT(MouseButtonDown)
+    struct MouseMove : public FluxworksEvent
     {
-        this->button = button;
-        this->modifiers = modifiers;
-        this->x = x;
-        this->y = y;
-    }
-    MouseButton button;
-    InputModifiers modifiers;
-    long x;
-    long y;
-};
+        MouseMove(FluxworksEngineWindow* windowInstance, InputModifiers modifier, long x, long y) : _BASEEVT(MouseMove),
+            windowInstance(windowInstance), x(x), y(y), modifier(modifier)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+        InputModifiers modifier;
+        long x;
+        long y;
+    };
 
-struct Open : public FluxworksEvent
-{
-    Open(HWND windowHandle) : _BASEEVT(Open)
+    struct MouseButtonDown : public FluxworksEvent
     {
-        this->windowHandle = windowHandle;
-    }
-    HWND windowHandle;
-};
+        MouseButtonDown(FluxworksEngineWindow* windowInstance, MouseButton button, InputModifiers modifiers, long x, long y) : _BASEEVT(MouseButtonDown),
+            windowInstance(windowInstance), button(button), modifiers(modifiers), x(x), y(y)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+        MouseButton button;
+        InputModifiers modifiers;
+        long x;
+        long y;
+    };
 
-struct Close : public FluxworksEvent
-{
-    Close(HWND windowHandle) : _BASEEVT(Close)
+    struct MouseButtonUp : public FluxworksEvent
     {
-        this->windowHandle = windowHandle;
-    }
-    HWND windowHandle;
-};
+        MouseButtonUp(FluxworksEngineWindow* windowInstance, MouseButton button, InputModifiers modifiers, long x, long y) : _BASEEVT(MouseButtonUp),
+            windowInstance(windowInstance), button(button), modifiers(modifiers), x(x), y(y)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+        MouseButton button;
+        InputModifiers modifiers;
+        long x;
+        long y;
+    };
+
+    struct MouseWheel : public FluxworksEvent
+    {
+        MouseWheel(FluxworksEngineWindow* windowInstance, InputModifiers modifiers, int delta, long x, long y) : _BASEEVT(MouseWheel),
+            windowInstance(windowInstance), modifiers(modifiers), delta(delta), x(x), y(y)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+        InputModifiers modifiers;
+        int delta;
+        long x;
+        long y;
+    };
+
+    struct Open : public FluxworksEvent
+    {
+        Open(FluxworksEngineWindow* windowInstance) : _BASEEVT(Open),
+            windowInstance(windowInstance)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+    };
+
+    struct Close : public FluxworksEvent
+    {
+        Close(FluxworksEngineWindow* windowInstance) : _BASEEVT(Close),
+            windowInstance(windowInstance)
+        {
+        };
+        FluxworksEngineWindow* windowInstance;
+    };
+}

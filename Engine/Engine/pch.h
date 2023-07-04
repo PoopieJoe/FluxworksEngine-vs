@@ -17,9 +17,10 @@
 #include <memory>
 #include <thread>
 #include <utility>
-#include <stdlib.h>
+#include <cstdint>
 #include <exception>
 #include <stdexcept>
+#include <stdlib.h>
 
 
 // Data structs
