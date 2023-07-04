@@ -82,13 +82,20 @@ FluxworksEngineWindow::FluxworksEngineWindow(int width, int height, const char* 
 	{
 		throw std::runtime_error("Invalid Window Handler");
 	}
+    // create window, stay hidden
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
-
+    // create graphics object
+    gfx = std::make_unique<FluxworksGraphics>(hWnd);
 }
 
 FluxworksEngineWindow::~FluxworksEngineWindow()
 {
 	DestroyWindow(hWnd);
+}
+
+FluxworksGraphics& FluxworksEngineWindow::GFX()
+{
+    return *gfx;
 }
 
 LRESULT CALLBACK FluxworksEngineWindow::HandeMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

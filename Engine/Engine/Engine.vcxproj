@@ -151,6 +151,7 @@
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="FluxworksEngine.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GraphicsDriver.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="EventTypes.h" />
     <ClInclude Include="Logging.h" />
@@ -162,6 +163,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="EventTypes.cpp" />
     <ClCompile Include="FluxworksEngine.cpp" />
+    <ClCompile Include="GraphicsDriver.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

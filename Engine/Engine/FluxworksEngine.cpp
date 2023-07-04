@@ -91,10 +91,12 @@ void FluxworksEngine::createWindow(int width, int height, const char* name)
 			else
 			{
 				// Update the scene.
+				window.GFX().clear(0.0f, 0.5f, 0.5f, 1.0f);
 
 				// Render frames during idle time (when no messages are waiting).
 
 				// Present the frame to the screen.
+				window.GFX().present();
 			}
 		}
 	});
@@ -121,10 +123,10 @@ void FluxworksEngine::_loop()
 
 
 	// Tick
-	this->_eventDispatcher->dispatchEvent(new TickEvent(
-		dt,
-		t
-	));
+	this->_eventDispatcher->dispatchEvent(
+		new TickEvent(dt,t), 
+		false
+	);
 
 	// Put thread to sleep until next tick starts
 	// If tickframe overrun -> skip
