@@ -37,8 +37,15 @@ template <class Event>
 class FluxworksEventHandler : public _FluxworksEventHandlerBase
 {
 public:
+	FluxworksEventHandler() = default;
+
 	virtual void handler(Event*) = 0;
 	void handler(FluxworksEvent*);
+
+	bool operator==(const FluxworksEventHandler& other) const
+	{
+		return this==other;
+	}
 };
 
 /// <summary>

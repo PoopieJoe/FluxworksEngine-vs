@@ -11,6 +11,7 @@ class _BuiltinTickHandler : public FluxworksEventHandler<TickEvent>
 public:
 	void handler(TickEvent* event)
 	{
+		// TODO implement builtin tick handler
 		//std::cout << "Builtin tick handler for engine things" << std::endl;
 	}
 };
@@ -120,11 +121,10 @@ void FluxworksEngine::_loop()
 
 
 	// Tick
-	// DISABLED WHILE IM DOING GRAPHICS THINGS
-	//this->_eventDispatcher->dispatchEvent(new TickEvent(
-	//	dt,
-	//	t
-	//));
+	this->_eventDispatcher->dispatchEvent(new TickEvent(
+		dt,
+		t
+	));
 
 	// Put thread to sleep until next tick starts
 	// If tickframe overrun -> skip
