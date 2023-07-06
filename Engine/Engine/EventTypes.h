@@ -36,6 +36,20 @@ enum class MouseButton {
     XButton2
 };
 
+class TickEvent : public FluxworksEvent
+{
+public:
+    TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time) : _BASEEVT(TickEvent),
+        deltaTime(deltaTime), time(time)
+    {
+        this->deltaTime = deltaTime;
+        this->time = time;
+    }
+
+    std::chrono::duration<double> deltaTime;
+    std::chrono::steady_clock::time_point time;
+};
+
 namespace WindowEvents 
 {
     struct KeyDown : public FluxworksEvent

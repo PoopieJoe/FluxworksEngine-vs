@@ -1,21 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 
-#include <thread>
-#include <iostream>
-
-// DirectX 3D 11
-#include <d3d11.h>
-#include <d3d11_2.h>
-
-// C RunTime Header Files
-#include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
-#include <tchar.h>
-
 #include "WindowsMessageMap.h"
-
 #include "ErrorTypes.h"
 #include "EventTypes.h"
 #include "EventDispatcher.h"
@@ -93,9 +79,19 @@ FluxworksEngineWindow::~FluxworksEngineWindow()
 	DestroyWindow(hWnd);
 }
 
+const uintptr_t FluxworksEngineWindow::identifier()
+{
+    return reinterpret_cast<const uintptr_t>(this->hWnd);
+}
+
 FluxworksGraphics& FluxworksEngineWindow::GFX()
 {
     return *gfx;
+}
+
+void FluxworksEngineWindow::fill(float r, float g, float b)
+{
+    this->gfx->clear(r, g, b, 1.0f);
 }
 
 LRESULT CALLBACK FluxworksEngineWindow::HandeMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

@@ -1,12 +1,5 @@
 #pragma once
 #include "pch.h"
-#include <stdint.h>
-#include <unordered_set>
-#include <list>
-#include <iostream>
-#include <functional>
-#include <algorithm>
-#include <stdexcept>
 
 /// <summary>
 /// Base Event class from which all events must inherit

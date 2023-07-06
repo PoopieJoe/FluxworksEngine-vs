@@ -2,7 +2,8 @@
 
 #include <chrono>
 
-FluxworksEngine TestGameApp::gameEngine;
+FluxworksEngine::Core TestGameApp::gameEngine;
+FluxworksEngineWindow* TestGameApp::window;
 
 class TickHandler : public FluxworksEventHandler<TickEvent>
 {
@@ -73,7 +74,8 @@ class WindowOpenHandler : public FluxworksEventHandler<WindowEvents::Open>
 public:
     void handler(WindowEvents::Open* event)
     {
-        std::cout << "Created Window: \"" << event->windowInstance->name << "\", id " << event->windowInstance->identifier() << std::endl;
+        //std::cout << "Created Window: \"" << event->windowInstance->name << "\", id " << event->windowInstance->identifier() << std::endl;
+        //event->windowInstance->fill(0.0f, 0.5f, 0.5f);
     };
 };
 
@@ -82,6 +84,7 @@ class WindowCloseHandler : public FluxworksEventHandler<WindowEvents::Close>
 public:
     void handler(WindowEvents::Close* event)
     {
+        //std::cout << "Destroyed Window: \"" << event->windowInstance->name << "\", id " << event->windowInstance->identifier() << std::endl;
         TestGameApp::gameEngine.stop();
     }
 };
@@ -112,7 +115,7 @@ TestGameApp::~TestGameApp()
 void TestGameApp::run()
 {
     TestGameApp::gameEngine.start();
-    TestGameApp::gameEngine.createWindow(480, 360, WINDOWNAME);
+    TestGameApp::window = TestGameApp::gameEngine.createWindow(480, 360, WINDOWNAME);
 
     //wait until window is closed
     while (TestGameApp::gameEngine.isRunning());

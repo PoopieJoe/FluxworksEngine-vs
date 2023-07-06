@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <chrono>
 
 #include "FluxworksEngine.h"
 #include "Window.h"
@@ -16,42 +15,37 @@ public:
 	}
 };
 
-FluxworksEngine::FluxworksEngine()
+FluxworksEngine::Core::Core()
 {
 	// Event dispatcher
 	this->_eventDispatcher->registerHandler(new _BuiltinTickHandler);
 
 	// Loop parameters
-	this->tickFrameDuration = std::chrono::seconds(1/TICKRATE); // default loop at 1Hz
+	this->tickFrameDuration = std::chrono::seconds(1/tickrate); // default loop at 1Hz
 	this->_running = false;
 	this->_previousTickTime = std::chrono::high_resolution_clock::now();
 }
 
-FluxworksEngine::~FluxworksEngine()
+FluxworksEngine::Core::~Core()
 {
 }
 
-void FluxworksEngine::registerEventHandler(_FluxworksEventHandlerBase* eventHandler)
+void FluxworksEngine::Core::registerEventHandler(_FluxworksEventHandlerBase* eventHandler)
 {
 	this->_eventDispatcher->registerHandler(eventHandler);
 }
 
-void FluxworksEngine::registerEventHandlers(std::list<_FluxworksEventHandlerBase*> eventHandlers)
+void FluxworksEngine::Core::registerEventHandlers(std::list<_FluxworksEventHandlerBase*> eventHandlers)
 {
 	for (_FluxworksEventHandlerBase* const& i : eventHandlers) this->registerEventHandler(i);
 }
 
-void FluxworksEngine::windowEventCallback(FluxworksEvent* event)
-{
-	std::cout << "windowCallback" << std::endl;
-}
-
-bool FluxworksEngine::isRunning()
+bool FluxworksEngine::Core::isRunning()
 {
 	return this->_running;
 }
 
-void FluxworksEngine::start()
+void FluxworksEngine::Core::start()
 {
 	if (!this->_running)
 	{
@@ -72,11 +66,13 @@ void FluxworksEngine::start()
 	}
 }
 
-void FluxworksEngine::createWindow(int width, int height, const char* name)
+FluxworksEngineWindow* FluxworksEngine::Core::createWindow(int width, int height, const char* name)
 {
-	std::thread windowThread([this, width, height, name]()
+	FluxworksEngineWindow* pWindow;
+	std::thread windowThread([this, pWindow, width, height, name]() mutable
 	{
 		FluxworksEngineWindow window(width, height, name, this->_eventDispatcher);
+		pWindow = &window;
 		MSG message = MSG();
 		while (WM_QUIT != message.message)
 		{
@@ -91,7 +87,7 @@ void FluxworksEngine::createWindow(int width, int height, const char* name)
 			else
 			{
 				// Update the scene.
-				window.GFX().clear(0.0f, 0.5f, 0.5f, 1.0f);
+				//window.GFX().clear(0.0f, 0.5f, 0.5f, 1.0f);
 
 				// Render frames during idle time (when no messages are waiting).
 
@@ -101,17 +97,18 @@ void FluxworksEngine::createWindow(int width, int height, const char* name)
 		}
 	});
 	windowThread.detach();
+	return pWindow;
 }
 
 
 
-void FluxworksEngine::stop()
+void FluxworksEngine::Core::stop()
 {
 	this->_running = false;
 	return;
 }
 
-void FluxworksEngine::_loop()
+void FluxworksEngine::Core::_loop()
 {
 	// fetch time for this tick
 	std::chrono::steady_clock::time_point t = std::chrono::high_resolution_clock::now();
@@ -141,12 +138,4 @@ void FluxworksEngine::_loop()
 	}
 	
 	return;
-}
-
-
-
-TickEvent::TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time) : FluxworksEvent("TickEvent")
-{
-	this->deltaTime = deltaTime;
-	this->time = time;
 }

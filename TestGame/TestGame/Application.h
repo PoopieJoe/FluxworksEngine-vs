@@ -15,7 +15,8 @@ public:
     TestGameApp();
     ~TestGameApp();
 
-    static FluxworksEngine gameEngine;
+    static FluxworksEngineWindow* window;
+    static FluxworksEngine::Core gameEngine;
     void run();
 
     //delete copy constructors

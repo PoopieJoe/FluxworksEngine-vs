@@ -15,66 +15,61 @@
 #include "EventTypes.h"
 
 
-/// <summary>
-/// Loop frequency in ticks per second. Has millisecond accuracy
-/// </summary>
-constexpr auto TICKRATE = 1;
 
-class TickEvent : public FluxworksEvent
-{
-public:
-	TickEvent(std::chrono::duration<double> deltaTime, std::chrono::steady_clock::time_point time);
 
-	std::chrono::duration<double> deltaTime;
-	std::chrono::steady_clock::time_point time;
-};
+namespace FluxworksEngine {
+	/// <summary>
+	/// Loop frequency in ticks per second. Has millisecond accuracy
+	/// </summary>
+	constexpr auto tickrate = 1;
 
-/// <summary>
-/// The Fluxworks Game Engine
-/// </summary>
-class FLUXWORKSENGINE_API FluxworksEngine {
 
-private:
-	bool _running;
-
-	std::chrono::steady_clock::time_point _previousTickTime;
-	void _loop();
-
-	std::shared_ptr<FluxworksEventDispatcher> _eventDispatcher = std::make_shared<FluxworksEventDispatcher>();
-	//std::shared_ptr<WindowRenderer> window = std::make_shared<WindowRenderer>();
-
-public:
-	FluxworksEngine();
-	~FluxworksEngine();
 
 	/// <summary>
-	/// tickrate of the engine logic
+	/// The Fluxworks Game Engine
 	/// </summary>
-	std::chrono::duration<double> tickFrameDuration;
+	class FLUXWORKSENGINE_API Core {
 
-	void registerEventHandler(_FluxworksEventHandlerBase* eventHandler);
+	private:
+		bool _running;
 
-	void registerEventHandlers(std::list<_FluxworksEventHandlerBase*> eventHandlers);
+		std::chrono::steady_clock::time_point _previousTickTime;
+		void _loop();
 
-	static void windowEventCallback(FluxworksEvent* event);
+		std::shared_ptr<FluxworksEventDispatcher> _eventDispatcher = std::make_shared<FluxworksEventDispatcher>();
 
-	/// <summary>
-	/// Checks whether the engine is running
-	/// </summary>
-	/// <returns>Whether the engine is running</returns>
-	bool isRunning();
+	public:
+		Core();
+		~Core();
 
-	/// <summary>
-	/// Starts the game engine. If the engine is already running, 
-	/// will return a [FluxworksAlreadyRunningException]
-	/// </summary>
-	void start();
+		/// <summary>
+		/// tickrate of the engine logic
+		/// </summary>
+		std::chrono::duration<double> tickFrameDuration;
 
-	void createWindow(int width, int height, const char* name);
+		void registerEventHandler(_FluxworksEventHandlerBase* eventHandler);
 
-	/// <summary>
-	/// Stops the game engine. If the engine is not running,
-	/// no effect.
-	/// </summary>
-	void stop();
-};
+		void registerEventHandlers(std::list<_FluxworksEventHandlerBase*> eventHandlers);
+
+		/// <summary>
+		/// Checks whether the engine is running
+		/// </summary>
+		/// <returns>Whether the engine is running</returns>
+		bool isRunning();
+
+		/// <summary>
+		/// Starts the game engine. If the engine is already running, 
+		/// will return a [FluxworksAlreadyRunningException]
+		/// </summary>
+		void start();
+
+		FluxworksEngineWindow* createWindow(int width, int height, const char* name);
+
+		/// <summary>
+		/// Stops the game engine. If the engine is not running,
+		/// no effect.
+		/// </summary>
+		void stop();
+	};
+}
+
