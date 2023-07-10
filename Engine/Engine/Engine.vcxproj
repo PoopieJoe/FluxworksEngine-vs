@@ -152,7 +152,7 @@
     <ClInclude Include="ErrorTypes.h" />
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="FluxworksEngine.h" />
-    <ClInclude Include="framework.h" />
+    <ClInclude Include="FluxworksEnginePlatform.h" />
     <ClInclude Include="GraphicsDriver.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="EventTypes.h" />

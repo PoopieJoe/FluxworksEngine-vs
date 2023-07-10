@@ -61,7 +61,7 @@ inline void FluxworksEventHandler<Event>::handler(FluxworksEvent* e)
 /// The dispatcher gathers registered handlers. When an event 
 /// is dispatched, all associated handlers of the event type are called
 /// </summary>
-class FluxworksEventDispatcher
+class FLUXWORKSENGINE_API FluxworksEventDispatcher
 {
 private:
     std::unordered_set<_FluxworksEventHandlerBase*> handlers;

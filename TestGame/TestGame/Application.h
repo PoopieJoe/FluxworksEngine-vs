@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <cstdint>
+#include <tuple>
 
 #include "FluxworksEngine.h"
 
@@ -16,8 +17,13 @@ public:
     ~TestGameApp();
 
     static FluxworksEngineWindow* window;
+    static bool windowActive;
     static FluxworksEngine::Core gameEngine;
     void run();
+
+    static std::tuple<float, float, float> bgcolor;
+
+    static void repaint();
 
     //delete copy constructors
     TestGameApp(const TestGameApp&) = delete;

@@ -63,15 +63,15 @@ FluxworksEngineWindow::FluxworksEngineWindow(int width, int height, const char* 
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, windowRegion.right - windowRegion.left, windowRegion.bottom - windowRegion.top,
 		nullptr, nullptr, WindowClass::GetInstance(), this
-	);
+	); //Generates WM_CREATE
+
 	if (hWnd == NULL)
 	{
 		throw std::runtime_error("Invalid Window Handler");
-	}
+	} 
     // create window, stay hidden
-	ShowWindow(hWnd, SW_SHOWDEFAULT);
-    // create graphics object
-    gfx = std::make_unique<FluxworksGraphics>(hWnd);
+	ShowWindow(hWnd, SW_SHOWDEFAULT); //Generates WM_SHOWWINDOW
+    
 }
 
 FluxworksEngineWindow::~FluxworksEngineWindow()
@@ -91,7 +91,8 @@ FluxworksGraphics& FluxworksEngineWindow::GFX()
 
 void FluxworksEngineWindow::fill(float r, float g, float b)
 {
-    this->gfx->clear(r, g, b, 1.0f);
+    if (!gfx) throw std::runtime_error("gfx not initialized");
+    gfx->clear(r, g, b, 1.0f);
 }
 
 LRESULT CALLBACK FluxworksEngineWindow::HandeMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -137,6 +138,8 @@ LRESULT FluxworksEngineWindow::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPA
         }
         case WM_CREATE:
         {
+            // create graphics object
+            gfx = std::make_unique<FluxworksGraphics>(hWnd);
             this->evd->dispatchEvent(new WindowEvents::Open(this), false);
             return 0;
         }

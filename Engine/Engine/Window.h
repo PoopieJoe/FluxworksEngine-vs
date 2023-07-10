@@ -4,7 +4,7 @@
 #include "EventDispatcher.h"
 #include "GraphicsDriver.h"
 
-class FluxworksEngineWindow
+class FLUXWORKSENGINE_API FluxworksEngineWindow
 {
 private:
 	class WindowClass

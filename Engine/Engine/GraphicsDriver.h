@@ -3,7 +3,7 @@
 #include <d3d11.h>
 
 
-class FluxworksGraphics
+class FLUXWORKSENGINE_API FluxworksGraphics
 {
 public:
 	FluxworksGraphics( HWND hWnd );
