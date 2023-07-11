@@ -130,7 +130,7 @@ TestGameApp::~TestGameApp()
 void TestGameApp::run()
 {
     TestGameApp::windowActive = false;
-    TestGameApp::gameEngine.tickFrameDuration = std::chrono::duration<double>(0.01f);
+    TestGameApp::gameEngine.tickFrameDuration = std::chrono::duration<double>(1.0/10.0);
     TestGameApp::gameEngine.start();
     TestGameApp::window = TestGameApp::gameEngine.createWindow(480, 360, WINDOWNAME);
 
